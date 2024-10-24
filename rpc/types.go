@@ -228,6 +228,70 @@ type InnerInstruction struct {
 	Instructions []CompiledInnerInstruction `json:"instructions"`
 }
 
+type SimulatedInnerInstruction struct {
+	// Index of the transaction instruction from which the inner instruction(s) originated
+	Index uint16 `json:"index"`
+	// Ordered list of inner program instructions that were invoked during a single transaction instruction.
+	Instructions []NestedInnerInstruction `json:"instructions"`
+}
+
+type NestedInnerInstruction struct {
+	Parsed      stdjson.RawMessage  `json:"parsed,omitempty"`
+	Program     string              `json:"program"`
+	ProgramID   string              `json:"programId"`
+	Accounts    []string            `json:"accounts,omitempty"`
+	Data        string              `json:"data,omitempty"`
+	StackHeight int                 `json:"stackHeight"`
+}
+
+func (nii *NestedInnerInstruction) UnmarshalParsedInstruction() (InnerParsedInstruction, error) {
+	var parsedInstruction InnerParsedInstruction
+	err := json.Unmarshal(nii.Parsed, &parsedInstruction)
+	if err != nil {
+		return InnerParsedInstruction{}, err
+	}
+	return parsedInstruction, nil
+}
+
+// Struct to represent parsed transfer information
+type TransferInfo struct {
+	Amount      string `json:"amount"`
+	Authority   string `json:"authority"`
+	Destination string `json:"destination"`
+	Source      string `json:"source"`
+	Mint 	  string `json:"mint"`
+	TokenAmount *UiTokenAmount `json:"tokenAmount"`
+}
+
+// Struct to represent tokenAmount for transferChecked
+type TokenAmount struct {
+	Amount         string  `json:"amount"`
+	Decimals       int     `json:"decimals"`
+	UiAmount       float64 `json:"uiAmount"`
+	UiAmountString string  `json:"uiAmountString"`
+}
+
+// Struct for parsed transferChecked info
+type TransferCheckedInfo struct {
+	Authority   string     `json:"authority"`
+	Destination string     `json:"destination"`
+	Mint        string     `json:"mint"`
+	Source      string     `json:"source"`
+	TokenAmount TokenAmount `json:"tokenAmount"`
+}
+
+// Struct to represent parsed instruction
+type InnerParsedInstruction struct {
+	Info TransferInfo  `json:"info"`
+	Type string        `json:"type"`
+}
+
+// Struct to represent parsed transferChecked instruction
+type ParsedTransferChecked struct {
+	Info TransferCheckedInfo `json:"info"`
+	Type string              `json:"type"`
+}
+
 type CompiledInnerInstruction struct {
 	solana.CompiledInstruction
 
