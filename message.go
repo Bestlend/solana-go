@@ -24,7 +24,7 @@ import (
 	bin "github.com/gagliardetto/binary"
 	"github.com/gagliardetto/treeout"
 
-	"github.com/gagliardetto/solana-go/text"
+	"github.com/Bestlend/solana-go/text"
 )
 
 type MessageAddressTableLookupSlice []MessageAddressTableLookup
@@ -238,36 +238,54 @@ func (mx *Message) EncodeToTree(txTree treeout.Branches) {
 	}
 	txTree.Child(text.Sf("RecentBlockhash: %s", mx.RecentBlockhash))
 
-	txTree.Child(fmt.Sprintf("AccountKeys[len=%v]", mx.numStaticAccounts()+mx.AddressTableLookups.NumLookups())).ParentFunc(func(accountKeysBranch treeout.Branches) {
-		accountKeys, err := mx.AccountMetaList()
-		if err != nil {
-			accountKeysBranch.Child(text.RedBG(fmt.Sprintf("AccountMetaList: %s", err)))
-		} else {
-			for keyIndex, key := range accountKeys {
-				isFromTable := mx.IsVersioned() && keyIndex >= mx.numStaticAccounts()
-				if isFromTable {
-					accountKeysBranch.Child(text.Sf("%s (from Address Table Lookup)", text.ColorizeBG(key.PublicKey.String())))
-				} else {
-					accountKeysBranch.Child(text.ColorizeBG(key.PublicKey.String()))
+	txTree.Child(
+		fmt.Sprintf(
+			"AccountKeys[len=%v]",
+			mx.numStaticAccounts()+mx.AddressTableLookups.NumLookups(),
+		),
+	).ParentFunc(
+		func(accountKeysBranch treeout.Branches) {
+			accountKeys, err := mx.AccountMetaList()
+			if err != nil {
+				accountKeysBranch.Child(text.RedBG(fmt.Sprintf("AccountMetaList: %s", err)))
+			} else {
+				for keyIndex, key := range accountKeys {
+					isFromTable := mx.IsVersioned() && keyIndex >= mx.numStaticAccounts()
+					if isFromTable {
+						accountKeysBranch.Child(
+							text.Sf(
+								"%s (from Address Table Lookup)",
+								text.ColorizeBG(key.PublicKey.String()),
+							),
+						)
+					} else {
+						accountKeysBranch.Child(text.ColorizeBG(key.PublicKey.String()))
+					}
 				}
 			}
-		}
-	})
+		},
+	)
 
 	if mx.IsVersioned() {
-		txTree.Child(fmt.Sprintf("AddressTableLookups[len=%v]", len(mx.AddressTableLookups))).ParentFunc(func(lookupsBranch treeout.Branches) {
-			for _, lookup := range mx.AddressTableLookups {
-				lookupsBranch.Child(text.Sf("%s", text.ColorizeBG(lookup.AccountKey.String()))).ParentFunc(func(lookupBranch treeout.Branches) {
-					lookupBranch.Child(text.Sf("WritableIndexes: %v", lookup.WritableIndexes))
-					lookupBranch.Child(text.Sf("ReadonlyIndexes: %v", lookup.ReadonlyIndexes))
-				})
-			}
-		})
+		txTree.Child(fmt.Sprintf("AddressTableLookups[len=%v]", len(mx.AddressTableLookups))).ParentFunc(
+			func(lookupsBranch treeout.Branches) {
+				for _, lookup := range mx.AddressTableLookups {
+					lookupsBranch.Child(text.Sf("%s", text.ColorizeBG(lookup.AccountKey.String()))).ParentFunc(
+						func(lookupBranch treeout.Branches) {
+							lookupBranch.Child(text.Sf("WritableIndexes: %v", lookup.WritableIndexes))
+							lookupBranch.Child(text.Sf("ReadonlyIndexes: %v", lookup.ReadonlyIndexes))
+						},
+					)
+				}
+			},
+		)
 	}
 
-	txTree.Child("Header").ParentFunc(func(message treeout.Branches) {
-		mx.Header.EncodeToTree(message)
-	})
+	txTree.Child("Header").ParentFunc(
+		func(message treeout.Branches) {
+			mx.Header.EncodeToTree(message)
+		},
+	)
 }
 
 func (header *MessageHeader) EncodeToTree(mxBranch treeout.Branches) {
@@ -573,7 +591,11 @@ func (mx *Message) UnmarshalLegacy(decoder *bin.Decoder) (err error) {
 			return fmt.Errorf("unable to decode numAccountKeys: %w", err)
 		}
 		if numAccountKeys > decoder.Remaining()/32 {
-			return fmt.Errorf("numAccountKeys %d is too large for remaining bytes %d", numAccountKeys, decoder.Remaining())
+			return fmt.Errorf(
+				"numAccountKeys %d is too large for remaining bytes %d",
+				numAccountKeys,
+				decoder.Remaining(),
+			)
 		}
 		mx.AccountKeys = make(PublicKeySlice, numAccountKeys)
 		for i := 0; i < numAccountKeys; i++ {
@@ -595,7 +617,11 @@ func (mx *Message) UnmarshalLegacy(decoder *bin.Decoder) (err error) {
 			return fmt.Errorf("unable to decode numInstructions: %w", err)
 		}
 		if numInstructions > decoder.Remaining() {
-			return fmt.Errorf("numInstructions %d is greater than remaining bytes %d", numInstructions, decoder.Remaining())
+			return fmt.Errorf(
+				"numInstructions %d is greater than remaining bytes %d",
+				numInstructions,
+				decoder.Remaining(),
+			)
 		}
 		mx.Instructions = make([]CompiledInstruction, numInstructions)
 		for instructionIndex := 0; instructionIndex < numInstructions; instructionIndex++ {
@@ -611,13 +637,23 @@ func (mx *Message) UnmarshalLegacy(decoder *bin.Decoder) (err error) {
 					return fmt.Errorf("unable to decode numAccounts for ix[%d]: %w", instructionIndex, err)
 				}
 				if numAccounts > decoder.Remaining() {
-					return fmt.Errorf("ix[%v]: numAccounts %d is greater than remaining bytes %d", instructionIndex, numAccounts, decoder.Remaining())
+					return fmt.Errorf(
+						"ix[%v]: numAccounts %d is greater than remaining bytes %d",
+						instructionIndex,
+						numAccounts,
+						decoder.Remaining(),
+					)
 				}
 				mx.Instructions[instructionIndex].Accounts = make([]uint16, numAccounts)
 				for i := 0; i < numAccounts; i++ {
 					accountIndex, err := decoder.ReadUint8()
 					if err != nil {
-						return fmt.Errorf("unable to decode accountIndex for ix[%d].Accounts[%d]: %w", instructionIndex, i, err)
+						return fmt.Errorf(
+							"unable to decode accountIndex for ix[%d].Accounts[%d]: %w",
+							instructionIndex,
+							i,
+							err,
+						)
 					}
 					mx.Instructions[instructionIndex].Accounts[i] = uint16(accountIndex)
 				}
@@ -628,7 +664,12 @@ func (mx *Message) UnmarshalLegacy(decoder *bin.Decoder) (err error) {
 					return fmt.Errorf("unable to decode dataLen for ix[%d]: %w", instructionIndex, err)
 				}
 				if dataLen > decoder.Remaining() {
-					return fmt.Errorf("ix[%v]: dataLen %d is greater than remaining bytes %d", instructionIndex, dataLen, decoder.Remaining())
+					return fmt.Errorf(
+						"ix[%v]: dataLen %d is greater than remaining bytes %d",
+						instructionIndex,
+						dataLen,
+						decoder.Remaining(),
+					)
 				}
 				dataBytes, err := decoder.ReadBytes(dataLen)
 				if err != nil {

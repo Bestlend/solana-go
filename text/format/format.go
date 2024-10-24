@@ -17,10 +17,10 @@ package format
 import (
 	"strings"
 
+	"github.com/Bestlend/solana-go"
+	"github.com/Bestlend/solana-go/text"
+	. "github.com/Bestlend/solana-go/text"
 	"github.com/davecgh/go-spew/spew"
-	"github.com/gagliardetto/solana-go"
-	"github.com/gagliardetto/solana-go/text"
-	. "github.com/gagliardetto/solana-go/text"
 )
 
 func Program(name string, programID solana.PublicKey) string {
@@ -77,13 +77,15 @@ func Meta(name string, meta *solana.AccountMeta) string {
 }
 
 func prefixEachLineExceptFirst(prefix string, s string) string {
-	return foreachLine(s,
+	return foreachLine(
+		s,
 		func(i int, line string) string {
 			if i == 0 {
 				return Lime(line) + "\n"
 			}
 			return prefix + Lime(line) + "\n"
-		})
+		},
+	)
 }
 
 type sf func(int, string) string

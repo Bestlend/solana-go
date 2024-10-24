@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"math"
 
+	"github.com/Bestlend/solana-go"
+	"github.com/Bestlend/solana-go/rpc"
 	bin "github.com/gagliardetto/binary"
-	"github.com/gagliardetto/solana-go"
-	"github.com/gagliardetto/solana-go/rpc"
 )
 
 // The serialized size of lookup table metadata.
@@ -112,7 +112,11 @@ func (a *AddressLookupTableState) UnmarshalWithDecoder(decoder *bin.Decoder) (er
 		// return fmt.Errorf("lookup table is invalid; serialized addresses are not a multiple of 32 bytes, with %d bytes remaining", serializedAddressesNumBytes%32)
 	}
 	if numSerializedAddresses > LOOKUP_TABLE_MAX_ADDRESSES {
-		return fmt.Errorf("lookup table is invalid: max addresses exceeded (%d > %d)", numSerializedAddresses, LOOKUP_TABLE_MAX_ADDRESSES)
+		return fmt.Errorf(
+			"lookup table is invalid: max addresses exceeded (%d > %d)",
+			numSerializedAddresses,
+			LOOKUP_TABLE_MAX_ADDRESSES,
+		)
 	}
 
 	// Set the position to the start of the serialized addresses.

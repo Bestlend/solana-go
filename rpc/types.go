@@ -25,7 +25,7 @@ import (
 
 	bin "github.com/gagliardetto/binary"
 
-	"github.com/gagliardetto/solana-go"
+	"github.com/Bestlend/solana-go"
 )
 
 type Context struct {
@@ -236,12 +236,12 @@ type SimulatedInnerInstruction struct {
 }
 
 type NestedInnerInstruction struct {
-	Parsed      stdjson.RawMessage  `json:"parsed,omitempty"`
-	Program     string              `json:"program"`
-	ProgramID   string              `json:"programId"`
-	Accounts    []string            `json:"accounts,omitempty"`
-	Data        string              `json:"data,omitempty"`
-	StackHeight int                 `json:"stackHeight"`
+	Parsed      stdjson.RawMessage `json:"parsed,omitempty"`
+	Program     string             `json:"program"`
+	ProgramID   string             `json:"programId"`
+	Accounts    []string           `json:"accounts,omitempty"`
+	Data        string             `json:"data,omitempty"`
+	StackHeight int                `json:"stackHeight"`
 }
 
 func (nii *NestedInnerInstruction) UnmarshalParsedInstruction() (InnerParsedInstruction, error) {
@@ -255,11 +255,11 @@ func (nii *NestedInnerInstruction) UnmarshalParsedInstruction() (InnerParsedInst
 
 // Struct to represent parsed transfer information
 type TransferInfo struct {
-	Amount      string `json:"amount"`
-	Authority   string `json:"authority"`
-	Destination string `json:"destination"`
-	Source      string `json:"source"`
-	Mint 	  string `json:"mint"`
+	Amount      string         `json:"amount"`
+	Authority   string         `json:"authority"`
+	Destination string         `json:"destination"`
+	Source      string         `json:"source"`
+	Mint        string         `json:"mint"`
 	TokenAmount *UiTokenAmount `json:"tokenAmount"`
 }
 
@@ -273,17 +273,17 @@ type TokenAmount struct {
 
 // Struct for parsed transferChecked info
 type TransferCheckedInfo struct {
-	Authority   string     `json:"authority"`
-	Destination string     `json:"destination"`
-	Mint        string     `json:"mint"`
-	Source      string     `json:"source"`
+	Authority   string      `json:"authority"`
+	Destination string      `json:"destination"`
+	Mint        string      `json:"mint"`
+	Source      string      `json:"source"`
 	TokenAmount TokenAmount `json:"tokenAmount"`
 }
 
 // Struct to represent parsed instruction
 type InnerParsedInstruction struct {
-	Info TransferInfo  `json:"info"`
-	Type string        `json:"type"`
+	Info TransferInfo `json:"info"`
+	Type string       `json:"type"`
 }
 
 // Struct to represent parsed transferChecked instruction

@@ -7,7 +7,7 @@
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
 //
-//      http://www.apache.org/licenses/LICENSE-2.0
+//	http://www.apache.org/licenses/LICENSE-2.0
 //
 // Unless required by applicable law or agreed to in writing, software
 // distributed under the License is distributed on an "AS IS" BASIS,
@@ -22,8 +22,8 @@ import (
 	"fmt"
 	"math/big"
 
+	"github.com/Bestlend/solana-go"
 	bin "github.com/gagliardetto/binary"
-	"github.com/gagliardetto/solana-go"
 	"go.uber.org/zap"
 )
 
@@ -153,13 +153,15 @@ func (o *Orderbook) Items(descending bool, f func(node *SlabLeafNode) error) err
 	return nil
 }
 
-var SlabFactoryImplDef = bin.NewVariantDefinition(bin.Uint32TypeIDEncoding, []bin.VariantType{
-	{Name: "uninitialized", Type: (*SlabUninitialized)(nil)},
-	{Name: "inner_node", Type: (*SlabInnerNode)(nil)},
-	{Name: "leaf_node", Type: (*SlabLeafNode)(nil)},
-	{Name: "free_node", Type: (*SlabFreeNode)(nil)},
-	{Name: "last_free_node", Type: (*SlabLastFreeNode)(nil)},
-})
+var SlabFactoryImplDef = bin.NewVariantDefinition(
+	bin.Uint32TypeIDEncoding, []bin.VariantType{
+		{Name: "uninitialized", Type: (*SlabUninitialized)(nil)},
+		{Name: "inner_node", Type: (*SlabInnerNode)(nil)},
+		{Name: "leaf_node", Type: (*SlabLeafNode)(nil)},
+		{Name: "free_node", Type: (*SlabFreeNode)(nil)},
+		{Name: "last_free_node", Type: (*SlabLastFreeNode)(nil)},
+	},
+)
 
 type Slab struct {
 	bin.BaseVariant
@@ -225,23 +227,29 @@ type OrderID bin.Uint128
 func NewOrderID(orderID string) (OrderID, error) {
 	d, err := hex.DecodeString(orderID)
 	if err != nil {
-		return OrderID(bin.Uint128{
-			Lo: 0,
-			Hi: 0,
-		}), fmt.Errorf("unable to decode order ID: %w", err)
+		return OrderID(
+			bin.Uint128{
+				Lo: 0,
+				Hi: 0,
+			},
+		), fmt.Errorf("unable to decode order ID: %w", err)
 	}
 
 	if len(d) < 16 {
-		return OrderID(bin.Uint128{
-			Lo: 0,
-			Hi: 0,
-		}), fmt.Errorf("order ID too short expecting at least 16 bytes got %d", len(d))
+		return OrderID(
+			bin.Uint128{
+				Lo: 0,
+				Hi: 0,
+			},
+		), fmt.Errorf("order ID too short expecting at least 16 bytes got %d", len(d))
 	}
 
-	return OrderID(bin.Uint128{
-		Lo: binary.BigEndian.Uint64(d[8:]),
-		Hi: binary.BigEndian.Uint64(d[:8]),
-	}), nil
+	return OrderID(
+		bin.Uint128{
+			Lo: binary.BigEndian.Uint64(d[8:]),
+			Hi: binary.BigEndian.Uint64(d[:8]),
+		},
+	), nil
 }
 
 func (o OrderID) Price() uint64 {

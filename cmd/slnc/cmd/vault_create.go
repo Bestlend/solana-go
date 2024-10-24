@@ -21,10 +21,10 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/gagliardetto/solana-go"
+	"github.com/Bestlend/solana-go"
 
-	"github.com/gagliardetto/solana-go/cli"
-	"github.com/gagliardetto/solana-go/vault"
+	"github.com/Bestlend/solana-go/cli"
+	"github.com/Bestlend/solana-go/vault"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
 )
@@ -99,7 +99,10 @@ You can then use this vault for the different cmd operations.`,
 
 				newKeys = append(newKeys, pubKey)
 			}
-			fmt.Printf("Created %d keys. They will be shown when encrypted and written to disk successfully.\n", len(newKeys))
+			fmt.Printf(
+				"Created %d keys. They will be shown when encrypted and written to disk successfully.\n",
+				len(newKeys),
+			)
 		}
 
 		switch wrapType {
@@ -145,7 +148,12 @@ func init() {
 	vaultCmd.AddCommand(vaultCreateCmd)
 
 	vaultCreateCmd.Flags().IntP("keys", "k", 0, "Number of keypairs to create")
-	vaultCreateCmd.Flags().BoolP("import", "i", false, "Whether to import keys instead of creating them. This takes precedence over --keys, and private keys will be inputted on the command line.")
+	vaultCreateCmd.Flags().BoolP(
+		"import",
+		"i",
+		false,
+		"Whether to import keys instead of creating them. This takes precedence over --keys, and private keys will be inputted on the command line.",
+	)
 	vaultCreateCmd.Flags().StringP("comment", "", "", "Comment field in the vault's json file.")
 	vaultCreateCmd.Flags().StringP("vault-type", "t", "passphrase", "Vault type. One of: passphrase, kms-gcp")
 }

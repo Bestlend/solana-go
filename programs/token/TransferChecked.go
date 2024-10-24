@@ -18,9 +18,9 @@ import (
 	"errors"
 	"fmt"
 
+	ag_solanago "github.com/Bestlend/solana-go"
+	ag_format "github.com/Bestlend/solana-go/text/format"
 	ag_binary "github.com/gagliardetto/binary"
-	ag_solanago "github.com/gagliardetto/solana-go"
-	ag_format "github.com/gagliardetto/solana-go/text/format"
 	ag_treeout "github.com/gagliardetto/treeout"
 )
 
@@ -132,7 +132,10 @@ func (inst *TransferChecked) GetDestinationAccount() *ag_solanago.AccountMeta {
 
 // SetOwnerAccount sets the "owner" account.
 // The source account's owner/delegate.
-func (inst *TransferChecked) SetOwnerAccount(owner ag_solanago.PublicKey, multisigSigners ...ag_solanago.PublicKey) *TransferChecked {
+func (inst *TransferChecked) SetOwnerAccount(
+	owner ag_solanago.PublicKey,
+	multisigSigners ...ag_solanago.PublicKey,
+) *TransferChecked {
 	inst.Accounts[3] = ag_solanago.Meta(owner)
 	if len(multisigSigners) == 0 {
 		inst.Accounts[3].SIGNER()
@@ -204,35 +207,48 @@ func (inst *TransferChecked) Validate() error {
 func (inst *TransferChecked) EncodeToTree(parent ag_treeout.Branches) {
 	parent.Child(ag_format.Program(ProgramName, ProgramID)).
 		//
-		ParentFunc(func(programBranch ag_treeout.Branches) {
-			programBranch.Child(ag_format.Instruction("TransferChecked")).
-				//
-				ParentFunc(func(instructionBranch ag_treeout.Branches) {
+		ParentFunc(
+			func(programBranch ag_treeout.Branches) {
+				programBranch.Child(ag_format.Instruction("TransferChecked")).
+					//
+					ParentFunc(
+						func(instructionBranch ag_treeout.Branches) {
 
-					// Parameters of the instruction:
-					instructionBranch.Child("Params").ParentFunc(func(paramsBranch ag_treeout.Branches) {
-						paramsBranch.Child(ag_format.Param("  Amount", *inst.Amount))
-						paramsBranch.Child(ag_format.Param("Decimals", *inst.Decimals))
-					})
+							// Parameters of the instruction:
+							instructionBranch.Child("Params").ParentFunc(
+								func(paramsBranch ag_treeout.Branches) {
+									paramsBranch.Child(ag_format.Param("  Amount", *inst.Amount))
+									paramsBranch.Child(ag_format.Param("Decimals", *inst.Decimals))
+								},
+							)
 
-					// Accounts of the instruction:
-					instructionBranch.Child("Accounts").ParentFunc(func(accountsBranch ag_treeout.Branches) {
-						accountsBranch.Child(ag_format.Meta("     source", inst.Accounts[0]))
-						accountsBranch.Child(ag_format.Meta("       mint", inst.Accounts[1]))
-						accountsBranch.Child(ag_format.Meta("destination", inst.Accounts[2]))
-						accountsBranch.Child(ag_format.Meta("      owner", inst.Accounts[3]))
+							// Accounts of the instruction:
+							instructionBranch.Child("Accounts").ParentFunc(
+								func(accountsBranch ag_treeout.Branches) {
+									accountsBranch.Child(ag_format.Meta("     source", inst.Accounts[0]))
+									accountsBranch.Child(ag_format.Meta("       mint", inst.Accounts[1]))
+									accountsBranch.Child(ag_format.Meta("destination", inst.Accounts[2]))
+									accountsBranch.Child(ag_format.Meta("      owner", inst.Accounts[3]))
 
-						signersBranch := accountsBranch.Child(fmt.Sprintf("signers[len=%v]", len(inst.Signers)))
-						for i, v := range inst.Signers {
-							if len(inst.Signers) > 9 && i < 10 {
-								signersBranch.Child(ag_format.Meta(fmt.Sprintf(" [%v]", i), v))
-							} else {
-								signersBranch.Child(ag_format.Meta(fmt.Sprintf("[%v]", i), v))
-							}
-						}
-					})
-				})
-		})
+									signersBranch := accountsBranch.Child(
+										fmt.Sprintf(
+											"signers[len=%v]",
+											len(inst.Signers),
+										),
+									)
+									for i, v := range inst.Signers {
+										if len(inst.Signers) > 9 && i < 10 {
+											signersBranch.Child(ag_format.Meta(fmt.Sprintf(" [%v]", i), v))
+										} else {
+											signersBranch.Child(ag_format.Meta(fmt.Sprintf("[%v]", i), v))
+										}
+									}
+								},
+							)
+						},
+					)
+			},
+		)
 }
 
 func (obj TransferChecked) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {

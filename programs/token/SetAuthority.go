@@ -18,9 +18,9 @@ import (
 	"errors"
 	"fmt"
 
+	ag_solanago "github.com/Bestlend/solana-go"
+	ag_format "github.com/Bestlend/solana-go/text/format"
 	ag_binary "github.com/gagliardetto/binary"
-	ag_solanago "github.com/gagliardetto/solana-go"
-	ag_format "github.com/gagliardetto/solana-go/text/format"
 	ag_treeout "github.com/gagliardetto/treeout"
 )
 
@@ -93,7 +93,10 @@ func (inst *SetAuthority) GetSubjectAccount() *ag_solanago.AccountMeta {
 
 // SetAuthorityAccount sets the "authority" account.
 // The current authority of the mint or account.
-func (inst *SetAuthority) SetAuthorityAccount(authority ag_solanago.PublicKey, multisigSigners ...ag_solanago.PublicKey) *SetAuthority {
+func (inst *SetAuthority) SetAuthorityAccount(
+	authority ag_solanago.PublicKey,
+	multisigSigners ...ag_solanago.PublicKey,
+) *SetAuthority {
 	inst.Accounts[1] = ag_solanago.Meta(authority)
 	if len(multisigSigners) == 0 {
 		inst.Accounts[1].SIGNER()
@@ -156,33 +159,46 @@ func (inst *SetAuthority) Validate() error {
 func (inst *SetAuthority) EncodeToTree(parent ag_treeout.Branches) {
 	parent.Child(ag_format.Program(ProgramName, ProgramID)).
 		//
-		ParentFunc(func(programBranch ag_treeout.Branches) {
-			programBranch.Child(ag_format.Instruction("SetAuthority")).
-				//
-				ParentFunc(func(instructionBranch ag_treeout.Branches) {
+		ParentFunc(
+			func(programBranch ag_treeout.Branches) {
+				programBranch.Child(ag_format.Instruction("SetAuthority")).
+					//
+					ParentFunc(
+						func(instructionBranch ag_treeout.Branches) {
 
-					// Parameters of the instruction:
-					instructionBranch.Child("Params").ParentFunc(func(paramsBranch ag_treeout.Branches) {
-						paramsBranch.Child(ag_format.Param("     AuthorityType", *inst.AuthorityType))
-						paramsBranch.Child(ag_format.Param("NewAuthority (OPT)", inst.NewAuthority))
-					})
+							// Parameters of the instruction:
+							instructionBranch.Child("Params").ParentFunc(
+								func(paramsBranch ag_treeout.Branches) {
+									paramsBranch.Child(ag_format.Param("     AuthorityType", *inst.AuthorityType))
+									paramsBranch.Child(ag_format.Param("NewAuthority (OPT)", inst.NewAuthority))
+								},
+							)
 
-					// Accounts of the instruction:
-					instructionBranch.Child("Accounts").ParentFunc(func(accountsBranch ag_treeout.Branches) {
-						accountsBranch.Child(ag_format.Meta("  subject", inst.Accounts[0]))
-						accountsBranch.Child(ag_format.Meta("authority", inst.Accounts[1]))
+							// Accounts of the instruction:
+							instructionBranch.Child("Accounts").ParentFunc(
+								func(accountsBranch ag_treeout.Branches) {
+									accountsBranch.Child(ag_format.Meta("  subject", inst.Accounts[0]))
+									accountsBranch.Child(ag_format.Meta("authority", inst.Accounts[1]))
 
-						signersBranch := accountsBranch.Child(fmt.Sprintf("signers[len=%v]", len(inst.Signers)))
-						for i, v := range inst.Signers {
-							if len(inst.Signers) > 9 && i < 10 {
-								signersBranch.Child(ag_format.Meta(fmt.Sprintf(" [%v]", i), v))
-							} else {
-								signersBranch.Child(ag_format.Meta(fmt.Sprintf("[%v]", i), v))
-							}
-						}
-					})
-				})
-		})
+									signersBranch := accountsBranch.Child(
+										fmt.Sprintf(
+											"signers[len=%v]",
+											len(inst.Signers),
+										),
+									)
+									for i, v := range inst.Signers {
+										if len(inst.Signers) > 9 && i < 10 {
+											signersBranch.Child(ag_format.Meta(fmt.Sprintf(" [%v]", i), v))
+										} else {
+											signersBranch.Child(ag_format.Meta(fmt.Sprintf("[%v]", i), v))
+										}
+									}
+								},
+							)
+						},
+					)
+			},
+		)
 }
 
 func (obj SetAuthority) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {

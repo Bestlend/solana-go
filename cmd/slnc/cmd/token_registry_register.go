@@ -21,13 +21,13 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/gagliardetto/solana-go/rpc"
+	"github.com/Bestlend/solana-go/rpc"
 
 	"github.com/spf13/viper"
 
-	"github.com/gagliardetto/solana-go"
-	"github.com/gagliardetto/solana-go/programs/system"
-	"github.com/gagliardetto/solana-go/programs/tokenregistry"
+	"github.com/Bestlend/solana-go"
+	"github.com/Bestlend/solana-go/programs/system"
+	"github.com/Bestlend/solana-go/programs/tokenregistry"
 	"github.com/spf13/cobra"
 )
 
@@ -114,7 +114,15 @@ var tokenRegistryRegisterCmd = &cobra.Command{
 			tokenMetaAccount.PublicKey(),
 		).
 			Build()
-		registerTokenInstruction := tokenregistry.NewRegisterTokenInstruction(logo, name, symbol, website, tokenMetaAccount.PublicKey(), registrarPubKey, tokenAddress)
+		registerTokenInstruction := tokenregistry.NewRegisterTokenInstruction(
+			logo,
+			name,
+			symbol,
+			website,
+			tokenMetaAccount.PublicKey(),
+			registrarPubKey,
+			tokenAddress,
+		)
 
 		trx, err := solana.NewTransaction(
 			[]solana.Instruction{
@@ -128,20 +136,22 @@ var tokenRegistryRegisterCmd = &cobra.Command{
 			return fmt.Errorf("unable to craft transaction: %w", err)
 		}
 
-		_, err = trx.Sign(func(key solana.PublicKey) *solana.PrivateKey {
-			// create account need to be signed by the private key of the new account
-			// that is not in the vault and will be lost after the execution.
-			if key == tokenMetaAccount.PublicKey() {
-				return &tokenMetaAccount.PrivateKey
-			}
-
-			for _, k := range vault.KeyBag {
-				if k.PublicKey() == key {
-					return &k
+		_, err = trx.Sign(
+			func(key solana.PublicKey) *solana.PrivateKey {
+				// create account need to be signed by the private key of the new account
+				// that is not in the vault and will be lost after the execution.
+				if key == tokenMetaAccount.PublicKey() {
+					return &tokenMetaAccount.PrivateKey
 				}
-			}
-			return nil
-		})
+
+				for _, k := range vault.KeyBag {
+					if k.PublicKey() == key {
+						return &k
+					}
+				}
+				return nil
+			},
+		)
 		if err != nil {
 			return fmt.Errorf("unable to sign transaction: %w", err)
 		}
@@ -160,5 +170,9 @@ var tokenRegistryRegisterCmd = &cobra.Command{
 
 func init() {
 	tokenRegistryCmd.AddCommand(tokenRegistryRegisterCmd)
-	tokenRegistryRegisterCmd.PersistentFlags().String("registrar", "9hFtYBYmBJCVguRYs9pBTWKYAFoKfjYR7zBPpEkVsmD", "The public key that will register the token")
+	tokenRegistryRegisterCmd.PersistentFlags().String(
+		"registrar",
+		"9hFtYBYmBJCVguRYs9pBTWKYAFoKfjYR7zBPpEkVsmD",
+		"The public key that will register the token",
+	)
 }

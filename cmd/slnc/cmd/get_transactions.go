@@ -22,13 +22,13 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/gagliardetto/solana-go"
-	_ "github.com/gagliardetto/solana-go/programs/serum"
-	_ "github.com/gagliardetto/solana-go/programs/system"
-	_ "github.com/gagliardetto/solana-go/programs/token"
-	_ "github.com/gagliardetto/solana-go/programs/tokenregistry"
-	"github.com/gagliardetto/solana-go/rpc"
-	"github.com/gagliardetto/solana-go/text"
+	"github.com/Bestlend/solana-go"
+	_ "github.com/Bestlend/solana-go/programs/serum"
+	_ "github.com/Bestlend/solana-go/programs/system"
+	_ "github.com/Bestlend/solana-go/programs/token"
+	_ "github.com/Bestlend/solana-go/programs/tokenregistry"
+	"github.com/Bestlend/solana-go/rpc"
+	"github.com/Bestlend/solana-go/text"
 	"github.com/spf13/cobra"
 )
 
@@ -47,11 +47,13 @@ var getTransactionsCmd = &cobra.Command{
 		}
 
 		limit := uint64(1)
-		csList, err := client.GetConfirmedSignaturesForAddress2(ctx, pubKey, &rpc.GetConfirmedSignaturesForAddress2Opts{
-			Limit: &limit,
-			// Before: "",
-			// Until:  "",
-		})
+		csList, err := client.GetConfirmedSignaturesForAddress2(
+			ctx, pubKey, &rpc.GetConfirmedSignaturesForAddress2Opts{
+				Limit: &limit,
+				// Before: "",
+				// Until:  "",
+			},
+		)
 		if err != nil {
 			return fmt.Errorf("unable to retrieve confirmed transaction signatures for account: %w", err)
 		}
@@ -72,7 +74,11 @@ var getTransactionsCmd = &cobra.Command{
 			}
 
 			if ct.Meta.Err != nil {
-				return fmt.Errorf("unable to get confirmed transaction with signature %q: %s", cs.Signature, ct.Meta.Err)
+				return fmt.Errorf(
+					"unable to get confirmed transaction with signature %q: %s",
+					cs.Signature,
+					ct.Meta.Err,
+				)
 			}
 
 			_, err = ct.MustGetTransaction().EncodeTree(text.NewTreeEncoder(os.Stdout, text.Bold("INSTRUCTIONS")))

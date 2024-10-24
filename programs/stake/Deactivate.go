@@ -17,9 +17,9 @@ package stake
 import (
 	"fmt"
 
+	"github.com/Bestlend/solana-go"
+	"github.com/Bestlend/solana-go/text/format"
 	bin "github.com/gagliardetto/binary"
-	"github.com/gagliardetto/solana-go"
-	"github.com/gagliardetto/solana-go/text/format"
 	"github.com/gagliardetto/treeout"
 )
 
@@ -80,22 +80,45 @@ func (inst Deactivate) Build() *Instruction {
 func (inst *Deactivate) EncodeToTree(parent treeout.Branches) {
 	parent.Child(format.Program(ProgramName, ProgramID)).
 		//
-		ParentFunc(func(programBranch treeout.Branches) {
-			programBranch.Child(format.Instruction("Deactivate")).
-				//
-				ParentFunc(func(instructionBranch treeout.Branches) {
-					// Parameters of the instruction:
-					instructionBranch.Child("Params").ParentFunc(func(paramsBranch treeout.Branches) {
-					})
+		ParentFunc(
+			func(programBranch treeout.Branches) {
+				programBranch.Child(format.Instruction("Deactivate")).
+					//
+					ParentFunc(
+						func(instructionBranch treeout.Branches) {
+							// Parameters of the instruction:
+							instructionBranch.Child("Params").ParentFunc(
+								func(paramsBranch treeout.Branches) {
+								},
+							)
 
-					// Accounts of the instruction:
-					instructionBranch.Child("Accounts").ParentFunc(func(accountsBranch treeout.Branches) {
-						accountsBranch.Child(format.Meta("            StakeAccount", inst.AccountMetaSlice.Get(0)))
-						accountsBranch.Child(format.Meta("             ClockSysvar", inst.AccountMetaSlice.Get(1)))
-						accountsBranch.Child(format.Meta("           StakeAuthoriy", inst.AccountMetaSlice.Get(2)))
-					})
-				})
-		})
+							// Accounts of the instruction:
+							instructionBranch.Child("Accounts").ParentFunc(
+								func(accountsBranch treeout.Branches) {
+									accountsBranch.Child(
+										format.Meta(
+											"            StakeAccount",
+											inst.AccountMetaSlice.Get(0),
+										),
+									)
+									accountsBranch.Child(
+										format.Meta(
+											"             ClockSysvar",
+											inst.AccountMetaSlice.Get(1),
+										),
+									)
+									accountsBranch.Child(
+										format.Meta(
+											"           StakeAuthoriy",
+											inst.AccountMetaSlice.Get(2),
+										),
+									)
+								},
+							)
+						},
+					)
+			},
+		)
 }
 
 // NewDeactivateInstructionBuilder creates a new `Deactivate` instruction builder.

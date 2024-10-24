@@ -18,9 +18,9 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/Bestlend/solana-go"
+	"github.com/Bestlend/solana-go/text/format"
 	bin "github.com/gagliardetto/binary"
-	"github.com/gagliardetto/solana-go"
-	"github.com/gagliardetto/solana-go/text/format"
 	"github.com/gagliardetto/treeout"
 )
 
@@ -106,23 +106,46 @@ func (inst Split) Build() *Instruction {
 func (inst *Split) EncodeToTree(parent treeout.Branches) {
 	parent.Child(format.Program(ProgramName, ProgramID)).
 		//
-		ParentFunc(func(programBranch treeout.Branches) {
-			programBranch.Child(format.Instruction("Split")).
-				//
-				ParentFunc(func(instructionBranch treeout.Branches) {
-					// Parameters of the instruction:
-					instructionBranch.Child("Params").ParentFunc(func(paramsBranch treeout.Branches) {
-						paramsBranch.Child(format.Param("Lamports", inst.Lamports))
-					})
+		ParentFunc(
+			func(programBranch treeout.Branches) {
+				programBranch.Child(format.Instruction("Split")).
+					//
+					ParentFunc(
+						func(instructionBranch treeout.Branches) {
+							// Parameters of the instruction:
+							instructionBranch.Child("Params").ParentFunc(
+								func(paramsBranch treeout.Branches) {
+									paramsBranch.Child(format.Param("Lamports", inst.Lamports))
+								},
+							)
 
-					// Accounts of the instruction:
-					instructionBranch.Child("Accounts").ParentFunc(func(accountsBranch treeout.Branches) {
-						accountsBranch.Child(format.Meta("              StakeAccount", inst.AccountMetaSlice.Get(0)))
-						accountsBranch.Child(format.Meta("           NewStakeAccount", inst.AccountMetaSlice.Get(1)))
-						accountsBranch.Child(format.Meta("             StakeAuthoriy", inst.AccountMetaSlice.Get(2)))
-					})
-				})
-		})
+							// Accounts of the instruction:
+							instructionBranch.Child("Accounts").ParentFunc(
+								func(accountsBranch treeout.Branches) {
+									accountsBranch.Child(
+										format.Meta(
+											"              StakeAccount",
+											inst.AccountMetaSlice.Get(0),
+										),
+									)
+									accountsBranch.Child(
+										format.Meta(
+											"           NewStakeAccount",
+											inst.AccountMetaSlice.Get(1),
+										),
+									)
+									accountsBranch.Child(
+										format.Meta(
+											"             StakeAuthoriy",
+											inst.AccountMetaSlice.Get(2),
+										),
+									)
+								},
+							)
+						},
+					)
+			},
+		)
 }
 
 // NewSplitInstructionBuilder creates a new `Split` instruction builder.

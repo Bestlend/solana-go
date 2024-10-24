@@ -6,8 +6,8 @@ import (
 	"math"
 	"testing"
 
+	"github.com/Bestlend/solana-go"
 	bin "github.com/gagliardetto/binary"
-	"github.com/gagliardetto/solana-go"
 	"github.com/stretchr/testify/require"
 )
 
@@ -287,7 +287,15 @@ func TestDecodeTable(t *testing.T) {
 	require.Equal(t, len(expectedKeys), len(table.Addresses), "decoded addresses length mismatch")
 
 	for i := range expectedKeys {
-		require.Equal(t, expectedKeys[i], table.Addresses[i], "key %d; extected %s, got %s", i, expectedKeys[i], table.Addresses[i])
+		require.Equal(
+			t,
+			expectedKeys[i],
+			table.Addresses[i],
+			"key %d; extected %s, got %s",
+			i,
+			expectedKeys[i],
+			table.Addresses[i],
+		)
 	}
 	{
 		buf := new(bytes.Buffer)
@@ -302,15 +310,19 @@ func TestDecodeTable(t *testing.T) {
 		tx := &solana.Transaction{}
 		err := tx.UnmarshalBase64(txBase64)
 		require.NoError(t, err)
-		err = tx.Message.SetAddressTables(map[solana.PublicKey]solana.PublicKeySlice{
-			solana.MPK("BpVMhYJB14QX5pXfbHRxB8vmpW4AFodWjBTDvfCJwsfv"): table.Addresses,
-		})
+		err = tx.Message.SetAddressTables(
+			map[solana.PublicKey]solana.PublicKeySlice{
+				solana.MPK("BpVMhYJB14QX5pXfbHRxB8vmpW4AFodWjBTDvfCJwsfv"): table.Addresses,
+			},
+		)
 		require.NoError(t, err)
 		require.True(t, tx.Message.IsSigner(solana.MPK("6hyuGqKQyhAEipjtaquiNHfd1dVjrNT3FzzanXurbK4W")))
 
-		require.Equal(t, solana.PublicKeySlice{
-			solana.MPK("BpVMhYJB14QX5pXfbHRxB8vmpW4AFodWjBTDvfCJwsfv"),
-		}, tx.Message.GetAddressTableLookups().GetTableIDs())
+		require.Equal(
+			t, solana.PublicKeySlice{
+				solana.MPK("BpVMhYJB14QX5pXfbHRxB8vmpW4AFodWjBTDvfCJwsfv"),
+			}, tx.Message.GetAddressTableLookups().GetTableIDs(),
+		)
 
 		metas, err := tx.Message.AccountMetaList()
 		require.NoError(t, err)
@@ -442,12 +454,14 @@ func TestDecodeTable(t *testing.T) {
 				lookups := tx.Message.GetAddressTableLookups()
 				require.Equal(t, 1, len(lookups))
 				first := lookups[0]
-				require.Equal(t,
+				require.Equal(
+					t,
 					solana.MessageAddressTableLookup{
 						AccountKey:      solana.MPK("BpVMhYJB14QX5pXfbHRxB8vmpW4AFodWjBTDvfCJwsfv"),
 						WritableIndexes: []uint8{18, 20, 21, 22, 24, 25, 26, 27, 28, 29, 12, 13, 14, 15},
 						ReadonlyIndexes: []uint8{1, 16, 19, 23, 30, 0, 10, 11},
-					}, first)
+					}, first,
+				)
 			}
 		}
 		{

@@ -19,9 +19,9 @@ import (
 	"errors"
 	"fmt"
 
+	ag_solanago "github.com/Bestlend/solana-go"
+	ag_format "github.com/Bestlend/solana-go/text/format"
 	ag_binary "github.com/gagliardetto/binary"
-	ag_solanago "github.com/gagliardetto/solana-go"
-	ag_format "github.com/gagliardetto/solana-go/text/format"
 	ag_treeout "github.com/gagliardetto/treeout"
 )
 
@@ -133,25 +133,33 @@ func (inst *AssignWithSeed) Validate() error {
 func (inst *AssignWithSeed) EncodeToTree(parent ag_treeout.Branches) {
 	parent.Child(ag_format.Program(ProgramName, ProgramID)).
 		//
-		ParentFunc(func(programBranch ag_treeout.Branches) {
-			programBranch.Child(ag_format.Instruction("AssignWithSeed")).
-				//
-				ParentFunc(func(instructionBranch ag_treeout.Branches) {
+		ParentFunc(
+			func(programBranch ag_treeout.Branches) {
+				programBranch.Child(ag_format.Instruction("AssignWithSeed")).
+					//
+					ParentFunc(
+						func(instructionBranch ag_treeout.Branches) {
 
-					// Parameters of the instruction:
-					instructionBranch.Child("Params").ParentFunc(func(paramsBranch ag_treeout.Branches) {
-						paramsBranch.Child(ag_format.Param(" Base", *inst.Base))
-						paramsBranch.Child(ag_format.Param(" Seed", *inst.Seed))
-						paramsBranch.Child(ag_format.Param("Owner", *inst.Owner))
-					})
+							// Parameters of the instruction:
+							instructionBranch.Child("Params").ParentFunc(
+								func(paramsBranch ag_treeout.Branches) {
+									paramsBranch.Child(ag_format.Param(" Base", *inst.Base))
+									paramsBranch.Child(ag_format.Param(" Seed", *inst.Seed))
+									paramsBranch.Child(ag_format.Param("Owner", *inst.Owner))
+								},
+							)
 
-					// Accounts of the instruction:
-					instructionBranch.Child("Accounts").ParentFunc(func(accountsBranch ag_treeout.Branches) {
-						accountsBranch.Child(ag_format.Meta("Assigned", inst.AccountMetaSlice[0]))
-						accountsBranch.Child(ag_format.Meta("    Base", inst.AccountMetaSlice[1]))
-					})
-				})
-		})
+							// Accounts of the instruction:
+							instructionBranch.Child("Accounts").ParentFunc(
+								func(accountsBranch ag_treeout.Branches) {
+									accountsBranch.Child(ag_format.Meta("Assigned", inst.AccountMetaSlice[0]))
+									accountsBranch.Child(ag_format.Meta("    Base", inst.AccountMetaSlice[1]))
+								},
+							)
+						},
+					)
+			},
+		)
 }
 
 func (inst AssignWithSeed) MarshalWithEncoder(encoder *ag_binary.Encoder) error {
@@ -213,7 +221,8 @@ func NewAssignWithSeedInstruction(
 	owner ag_solanago.PublicKey,
 	// Accounts:
 	assignedAccount ag_solanago.PublicKey,
-	baseAccount ag_solanago.PublicKey) *AssignWithSeed {
+	baseAccount ag_solanago.PublicKey,
+) *AssignWithSeed {
 	return NewAssignWithSeedInstructionBuilder().
 		SetBase(base).
 		SetSeed(seed).

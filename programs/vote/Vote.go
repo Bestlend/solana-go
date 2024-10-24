@@ -18,9 +18,9 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/Bestlend/solana-go"
+	"github.com/Bestlend/solana-go/text/format"
 	bin "github.com/gagliardetto/binary"
-	"github.com/gagliardetto/solana-go"
-	"github.com/gagliardetto/solana-go/text/format"
 	"github.com/gagliardetto/treeout"
 )
 
@@ -90,27 +90,35 @@ func (inst *Vote) Validate() error {
 
 func (inst *Vote) EncodeToTree(parent treeout.Branches) {
 	parent.Child(format.Program(ProgramName, ProgramID)).
-		ParentFunc(func(programBranch treeout.Branches) {
-			programBranch.Child(format.Instruction("Vote")).
-				ParentFunc(func(instructionBranch treeout.Branches) {
-					// Parameters of the instruction:
-					instructionBranch.Child("Params").ParentFunc(func(paramsBranch treeout.Branches) {
-						paramsBranch.Child(format.Param("Slots", inst.Slots))
-						paramsBranch.Child(format.Param("Hash", inst.Hash))
-						var ts time.Time
-						if inst.Timestamp != nil {
-							ts = time.Unix(*inst.Timestamp, 0).UTC()
-						}
-						paramsBranch.Child(format.Param("Timestamp", ts))
-					})
+		ParentFunc(
+			func(programBranch treeout.Branches) {
+				programBranch.Child(format.Instruction("Vote")).
+					ParentFunc(
+						func(instructionBranch treeout.Branches) {
+							// Parameters of the instruction:
+							instructionBranch.Child("Params").ParentFunc(
+								func(paramsBranch treeout.Branches) {
+									paramsBranch.Child(format.Param("Slots", inst.Slots))
+									paramsBranch.Child(format.Param("Hash", inst.Hash))
+									var ts time.Time
+									if inst.Timestamp != nil {
+										ts = time.Unix(*inst.Timestamp, 0).UTC()
+									}
+									paramsBranch.Child(format.Param("Timestamp", ts))
+								},
+							)
 
-					// Accounts of the instruction:
-					instructionBranch.Child("Accounts").ParentFunc(func(accountsBranch treeout.Branches) {
-						accountsBranch.Child(format.Meta("Vote Account      ", inst.AccountMetaSlice[0]))
-						accountsBranch.Child(format.Meta("Slot Hashes Sysvar", inst.AccountMetaSlice[1]))
-						accountsBranch.Child(format.Meta("Clock Sysvar      ", inst.AccountMetaSlice[2]))
-						accountsBranch.Child(format.Meta("Vote Authority    ", inst.AccountMetaSlice[3]))
-					})
-				})
-		})
+							// Accounts of the instruction:
+							instructionBranch.Child("Accounts").ParentFunc(
+								func(accountsBranch treeout.Branches) {
+									accountsBranch.Child(format.Meta("Vote Account      ", inst.AccountMetaSlice[0]))
+									accountsBranch.Child(format.Meta("Slot Hashes Sysvar", inst.AccountMetaSlice[1]))
+									accountsBranch.Child(format.Meta("Clock Sysvar      ", inst.AccountMetaSlice[2]))
+									accountsBranch.Child(format.Meta("Vote Authority    ", inst.AccountMetaSlice[3]))
+								},
+							)
+						},
+					)
+			},
+		)
 }

@@ -29,7 +29,7 @@ import (
 	"github.com/mr-tron/base58"
 	"go.uber.org/zap"
 
-	"github.com/gagliardetto/solana-go/text"
+	"github.com/Bestlend/solana-go/text"
 )
 
 type Transaction struct {
@@ -346,19 +346,23 @@ func NewTransaction(instructions []Instruction, recentBlockHash Hash, opts ...Tr
 	programIDsMap := make(map[PublicKey]struct{}, len(programIDs))
 	// Add programID to the account list
 	for _, programID := range programIDs {
-		accounts = append(accounts, &AccountMeta{
-			PublicKey:  programID,
-			IsSigner:   false,
-			IsWritable: false,
-		})
+		accounts = append(
+			accounts, &AccountMeta{
+				PublicKey:  programID,
+				IsSigner:   false,
+				IsWritable: false,
+			},
+		)
 
 		programIDsMap[programID] = struct{}{}
 	}
 
 	// Sort. Prioritizing first by signer, then by writable
-	sort.SliceStable(accounts, func(i, j int) bool {
-		return accounts[i].less(accounts[j])
-	})
+	sort.SliceStable(
+		accounts, func(i, j int) bool {
+			return accounts[i].less(accounts[j])
+		},
+	)
 
 	uniqAccountsMap := map[PublicKey]uint64{}
 	uniqAccounts := []*AccountMeta{}
@@ -417,17 +421,20 @@ func NewTransaction(instructions []Instruction, recentBlockHash Hash, opts ...Tr
 	message := Message{
 		RecentBlockhash: recentBlockHash,
 	}
-	lookupsMap := make(map[PublicKey]struct { // extended MessageAddressTableLookup
-		AccountKey      PublicKey // The account key of the address table.
-		WritableIndexes []uint8
-		Writable        []PublicKey
-		ReadonlyIndexes []uint8
-		Readonly        []PublicKey
-	})
+	lookupsMap := make(
+		map[PublicKey]struct { // extended MessageAddressTableLookup
+			AccountKey      PublicKey // The account key of the address table.
+			WritableIndexes []uint8
+			Writable        []PublicKey
+			ReadonlyIndexes []uint8
+			Readonly        []PublicKey
+		},
+	)
 	for idx, acc := range allKeys {
 
 		if debugNewTransaction {
-			zlog.Debug("transaction account",
+			zlog.Debug(
+				"transaction account",
 				zap.Int("account_index", idx),
 				zap.Stringer("account_pub_key", acc.PublicKey),
 			)
@@ -474,11 +481,13 @@ func NewTransaction(instructions []Instruction, recentBlockHash Hash, opts ...Tr
 			lookupsWritableKeys = append(lookupsWritableKeys, l.Writable...)
 			lookupsReadOnlyKeys = append(lookupsReadOnlyKeys, l.Readonly...)
 
-			lookups = append(lookups, MessageAddressTableLookup{
-				AccountKey:      tablePubKey,
-				WritableIndexes: l.WritableIndexes,
-				ReadonlyIndexes: l.ReadonlyIndexes,
-			})
+			lookups = append(
+				lookups, MessageAddressTableLookup{
+					AccountKey:      tablePubKey,
+					WritableIndexes: l.WritableIndexes,
+					ReadonlyIndexes: l.ReadonlyIndexes,
+				},
+			)
 		}
 
 		// prevent error created in ResolveLookups
@@ -490,7 +499,10 @@ func NewTransaction(instructions []Instruction, recentBlockHash Hash, opts ...Tr
 	}
 
 	var idx uint16
-	accountKeyIndex := make(map[string]uint16, len(message.AccountKeys)+len(lookupsWritableKeys)+len(lookupsReadOnlyKeys))
+	accountKeyIndex := make(
+		map[string]uint16,
+		len(message.AccountKeys)+len(lookupsWritableKeys)+len(lookupsReadOnlyKeys),
+	)
 	for _, acc := range message.AccountKeys {
 		accountKeyIndex[acc.String()] = idx
 		idx++
@@ -505,7 +517,8 @@ func NewTransaction(instructions []Instruction, recentBlockHash Hash, opts ...Tr
 	}
 
 	if debugNewTransaction {
-		zlog.Debug("message header compiled",
+		zlog.Debug(
+			"message header compiled",
 			zap.Uint8("num_required_signatures", message.Header.NumRequiredSignatures),
 			zap.Uint8("num_readonly_signed_accounts", message.Header.NumReadonlySignedAccounts),
 			zap.Uint8("num_readonly_unsigned_accounts", message.Header.NumReadonlyUnsignedAccounts),
@@ -522,11 +535,13 @@ func NewTransaction(instructions []Instruction, recentBlockHash Hash, opts ...Tr
 		if err != nil {
 			return nil, fmt.Errorf("unable to encode instructions [%d]: %w", txIdx, err)
 		}
-		message.Instructions = append(message.Instructions, CompiledInstruction{
-			ProgramIDIndex: accountKeyIndex[instruction.ProgramID().String()],
-			Accounts:       accountIndex,
-			Data:           data,
-		})
+		message.Instructions = append(
+			message.Instructions, CompiledInstruction{
+				ProgramIDIndex: accountKeyIndex[instruction.ProgramID().String()],
+				Accounts:       accountIndex,
+				Data:           data,
+			},
+		)
 	}
 
 	return &Transaction{
@@ -572,7 +587,11 @@ func (tx *Transaction) UnmarshalWithDecoder(decoder *bin.Decoder) (err error) {
 			return fmt.Errorf("numSignatures is negative")
 		}
 		if numSignatures > decoder.Remaining()/64 {
-			return fmt.Errorf("numSignatures %d is too large for remaining bytes %d", numSignatures, decoder.Remaining())
+			return fmt.Errorf(
+				"numSignatures %d is too large for remaining bytes %d",
+				numSignatures,
+				decoder.Remaining(),
+			)
 		}
 
 		tx.Signatures = make([]Signature, numSignatures)
@@ -638,7 +657,7 @@ func (tx *Transaction) EncodeTree(encoder *text.TreeEncoder) (int, error) {
 }
 
 // String returns a human-readable string representation of the transaction data.
-// To disable colors, set "github.com/gagliardetto/solana-go/text".DisableColors = true
+// To disable colors, set "github.com/Bestlend/solana-go/text".DisableColors = true
 func (tx *Transaction) String() string {
 	buf := new(bytes.Buffer)
 	_, err := tx.EncodeTree(text.NewTreeEncoder(buf, ""))
@@ -665,63 +684,100 @@ func (tx Transaction) MustToBase64() string {
 }
 
 func (tx *Transaction) EncodeToTree(parent treeout.Branches) {
-	parent.ParentFunc(func(txTree treeout.Branches) {
-		txTree.Child(fmt.Sprintf("Signatures[len=%v]", len(tx.Signatures))).ParentFunc(func(signaturesBranch treeout.Branches) {
-			for _, sig := range tx.Signatures {
-				signaturesBranch.Child(sig.String())
-			}
-		})
+	parent.ParentFunc(
+		func(txTree treeout.Branches) {
+			txTree.Child(fmt.Sprintf("Signatures[len=%v]", len(tx.Signatures))).ParentFunc(
+				func(signaturesBranch treeout.Branches) {
+					for _, sig := range tx.Signatures {
+						signaturesBranch.Child(sig.String())
+					}
+				},
+			)
 
-		txTree.Child("Message").ParentFunc(func(messageBranch treeout.Branches) {
-			tx.Message.EncodeToTree(messageBranch)
-		})
-	})
+			txTree.Child("Message").ParentFunc(
+				func(messageBranch treeout.Branches) {
+					tx.Message.EncodeToTree(messageBranch)
+				},
+			)
+		},
+	)
 
-	parent.Child(fmt.Sprintf("Instructions[len=%v]", len(tx.Message.Instructions))).ParentFunc(func(message treeout.Branches) {
-		for _, inst := range tx.Message.Instructions {
+	parent.Child(fmt.Sprintf("Instructions[len=%v]", len(tx.Message.Instructions))).ParentFunc(
+		func(message treeout.Branches) {
+			for _, inst := range tx.Message.Instructions {
 
-			progKey, err := tx.ResolveProgramIDIndex(inst.ProgramIDIndex)
-			if err == nil {
-				accounts, err := inst.ResolveInstructionAccounts(&tx.Message)
-				if err != nil {
-					message.Child(fmt.Sprintf(text.RedBG("cannot ResolveInstructionAccounts: %s"), err))
-					return
-				}
-				decodedInstruction, err := DecodeInstruction(progKey, accounts, inst.Data)
+				progKey, err := tx.ResolveProgramIDIndex(inst.ProgramIDIndex)
 				if err == nil {
-					if enToTree, ok := decodedInstruction.(text.EncodableToTree); ok {
-						enToTree.EncodeToTree(message)
+					accounts, err := inst.ResolveInstructionAccounts(&tx.Message)
+					if err != nil {
+						message.Child(fmt.Sprintf(text.RedBG("cannot ResolveInstructionAccounts: %s"), err))
+						return
+					}
+					decodedInstruction, err := DecodeInstruction(progKey, accounts, inst.Data)
+					if err == nil {
+						if enToTree, ok := decodedInstruction.(text.EncodableToTree); ok {
+							enToTree.EncodeToTree(message)
+						} else {
+							message.Child(spew.Sdump(decodedInstruction))
+						}
 					} else {
-						message.Child(spew.Sdump(decodedInstruction))
+						// TODO: log error?
+						message.Child(
+							fmt.Sprintf(
+								text.RedBG("cannot decode instruction for %s program: %s"),
+								progKey,
+								err,
+							),
+						).
+							Child(text.IndigoBG("Program") + ": " + text.Bold("<unknown>") + " " + text.ColorizeBG(progKey.String())).
+							//
+							ParentFunc(
+								func(programBranch treeout.Branches) {
+									programBranch.Child(text.Purple(text.Bold("Instruction")) + ": " + text.Bold("<unknown>")).
+										//
+										ParentFunc(
+											func(instructionBranch treeout.Branches) {
+												// Data of the instruction call:
+												instructionBranch.Child(
+													text.Sf(
+														"data[len=%v bytes]",
+														len(inst.Data),
+													),
+												).ParentFunc(
+													func(paramsBranch treeout.Branches) {
+														paramsBranch.Child(bin.FormatByteSlice(inst.Data))
+													},
+												)
+
+												// Accounts of the instruction call:
+												instructionBranch.Child(
+													text.Sf(
+														"accounts[len=%v]",
+														len(accounts),
+													),
+												).ParentFunc(
+													func(accountsBranch treeout.Branches) {
+														for i := range accounts {
+															accountsBranch.Child(
+																formatMeta(
+																	text.Sf("accounts[%v]", i),
+																	accounts[i],
+																),
+															)
+														}
+													},
+												)
+											},
+										)
+								},
+							)
 					}
 				} else {
-					// TODO: log error?
-					message.Child(fmt.Sprintf(text.RedBG("cannot decode instruction for %s program: %s"), progKey, err)).
-						Child(text.IndigoBG("Program") + ": " + text.Bold("<unknown>") + " " + text.ColorizeBG(progKey.String())).
-						//
-						ParentFunc(func(programBranch treeout.Branches) {
-							programBranch.Child(text.Purple(text.Bold("Instruction")) + ": " + text.Bold("<unknown>")).
-								//
-								ParentFunc(func(instructionBranch treeout.Branches) {
-									// Data of the instruction call:
-									instructionBranch.Child(text.Sf("data[len=%v bytes]", len(inst.Data))).ParentFunc(func(paramsBranch treeout.Branches) {
-										paramsBranch.Child(bin.FormatByteSlice(inst.Data))
-									})
-
-									// Accounts of the instruction call:
-									instructionBranch.Child(text.Sf("accounts[len=%v]", len(accounts))).ParentFunc(func(accountsBranch treeout.Branches) {
-										for i := range accounts {
-											accountsBranch.Child(formatMeta(text.Sf("accounts[%v]", i), accounts[i]))
-										}
-									})
-								})
-						})
+					message.Child(fmt.Sprintf(text.RedBG("cannot ResolveProgramIDIndex: %s"), err))
 				}
-			} else {
-				message.Child(fmt.Sprintf(text.RedBG("cannot ResolveProgramIDIndex: %s"), err))
 			}
-		}
-	})
+		},
+	)
 }
 
 func formatMeta(name string, meta *AccountMeta) string {

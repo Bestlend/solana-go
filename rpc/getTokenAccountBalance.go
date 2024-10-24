@@ -17,7 +17,7 @@ package rpc
 import (
 	"context"
 
-	"github.com/gagliardetto/solana-go"
+	"github.com/Bestlend/solana-go"
 )
 
 // GetTokenAccountBalance returns the token balance of an SPL Token account.
@@ -28,7 +28,8 @@ func (cl *Client) GetTokenAccountBalance(
 ) (out *GetTokenAccountBalanceResult, err error) {
 	params := []interface{}{account}
 	if commitment != "" {
-		params = append(params,
+		params = append(
+			params,
 			M{"commitment": commitment},
 		)
 	}

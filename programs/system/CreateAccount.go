@@ -19,9 +19,9 @@ import (
 	"errors"
 	"fmt"
 
+	ag_solanago "github.com/Bestlend/solana-go"
+	ag_format "github.com/Bestlend/solana-go/text/format"
 	ag_binary "github.com/gagliardetto/binary"
-	ag_solanago "github.com/gagliardetto/solana-go"
-	ag_format "github.com/gagliardetto/solana-go/text/format"
 	ag_treeout "github.com/gagliardetto/treeout"
 )
 
@@ -133,25 +133,33 @@ func (inst *CreateAccount) Validate() error {
 func (inst *CreateAccount) EncodeToTree(parent ag_treeout.Branches) {
 	parent.Child(ag_format.Program(ProgramName, ProgramID)).
 		//
-		ParentFunc(func(programBranch ag_treeout.Branches) {
-			programBranch.Child(ag_format.Instruction("CreateAccount")).
-				//
-				ParentFunc(func(instructionBranch ag_treeout.Branches) {
+		ParentFunc(
+			func(programBranch ag_treeout.Branches) {
+				programBranch.Child(ag_format.Instruction("CreateAccount")).
+					//
+					ParentFunc(
+						func(instructionBranch ag_treeout.Branches) {
 
-					// Parameters of the instruction:
-					instructionBranch.Child("Params").ParentFunc(func(paramsBranch ag_treeout.Branches) {
-						paramsBranch.Child(ag_format.Param("Lamports", *inst.Lamports))
-						paramsBranch.Child(ag_format.Param("   Space", *inst.Space))
-						paramsBranch.Child(ag_format.Param("   Owner", *inst.Owner))
-					})
+							// Parameters of the instruction:
+							instructionBranch.Child("Params").ParentFunc(
+								func(paramsBranch ag_treeout.Branches) {
+									paramsBranch.Child(ag_format.Param("Lamports", *inst.Lamports))
+									paramsBranch.Child(ag_format.Param("   Space", *inst.Space))
+									paramsBranch.Child(ag_format.Param("   Owner", *inst.Owner))
+								},
+							)
 
-					// Accounts of the instruction:
-					instructionBranch.Child("Accounts").ParentFunc(func(accountsBranch ag_treeout.Branches) {
-						accountsBranch.Child(ag_format.Meta("Funding", inst.AccountMetaSlice[0]))
-						accountsBranch.Child(ag_format.Meta("    New", inst.AccountMetaSlice[1]))
-					})
-				})
-		})
+							// Accounts of the instruction:
+							instructionBranch.Child("Accounts").ParentFunc(
+								func(accountsBranch ag_treeout.Branches) {
+									accountsBranch.Child(ag_format.Meta("Funding", inst.AccountMetaSlice[0]))
+									accountsBranch.Child(ag_format.Meta("    New", inst.AccountMetaSlice[1]))
+								},
+							)
+						},
+					)
+			},
+		)
 }
 
 func (inst CreateAccount) MarshalWithEncoder(encoder *ag_binary.Encoder) error {
@@ -212,7 +220,8 @@ func NewCreateAccountInstruction(
 	owner ag_solanago.PublicKey,
 	// Accounts:
 	fundingAccount ag_solanago.PublicKey,
-	newAccount ag_solanago.PublicKey) *CreateAccount {
+	newAccount ag_solanago.PublicKey,
+) *CreateAccount {
 	return NewCreateAccountInstructionBuilder().
 		SetLamports(lamports).
 		SetSpace(space).

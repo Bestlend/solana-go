@@ -17,9 +17,9 @@ package token
 import (
 	"errors"
 
+	ag_solanago "github.com/Bestlend/solana-go"
+	ag_format "github.com/Bestlend/solana-go/text/format"
 	ag_binary "github.com/gagliardetto/binary"
-	ag_solanago "github.com/gagliardetto/solana-go"
-	ag_format "github.com/gagliardetto/solana-go/text/format"
 	ag_treeout "github.com/gagliardetto/treeout"
 )
 
@@ -86,20 +86,26 @@ func (inst *SyncNative) Validate() error {
 func (inst *SyncNative) EncodeToTree(parent ag_treeout.Branches) {
 	parent.Child(ag_format.Program(ProgramName, ProgramID)).
 		//
-		ParentFunc(func(programBranch ag_treeout.Branches) {
-			programBranch.Child(ag_format.Instruction("SyncNative")).
-				//
-				ParentFunc(func(instructionBranch ag_treeout.Branches) {
+		ParentFunc(
+			func(programBranch ag_treeout.Branches) {
+				programBranch.Child(ag_format.Instruction("SyncNative")).
+					//
+					ParentFunc(
+						func(instructionBranch ag_treeout.Branches) {
 
-					// Parameters of the instruction:
-					instructionBranch.Child("Params").ParentFunc(func(paramsBranch ag_treeout.Branches) {})
+							// Parameters of the instruction:
+							instructionBranch.Child("Params").ParentFunc(func(paramsBranch ag_treeout.Branches) {})
 
-					// Accounts of the instruction:
-					instructionBranch.Child("Accounts").ParentFunc(func(accountsBranch ag_treeout.Branches) {
-						accountsBranch.Child(ag_format.Meta("tokenAccount", inst.AccountMetaSlice[0]))
-					})
-				})
-		})
+							// Accounts of the instruction:
+							instructionBranch.Child("Accounts").ParentFunc(
+								func(accountsBranch ag_treeout.Branches) {
+									accountsBranch.Child(ag_format.Meta("tokenAccount", inst.AccountMetaSlice[0]))
+								},
+							)
+						},
+					)
+			},
+		)
 }
 
 func (obj SyncNative) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
@@ -112,7 +118,8 @@ func (obj *SyncNative) UnmarshalWithDecoder(decoder *ag_binary.Decoder) (err err
 // NewSyncNativeInstruction declares a new SyncNative instruction with the provided parameters and accounts.
 func NewSyncNativeInstruction(
 	// Accounts:
-	tokenAccount ag_solanago.PublicKey) *SyncNative {
+	tokenAccount ag_solanago.PublicKey,
+) *SyncNative {
 	return NewSyncNativeInstructionBuilder().
 		SetTokenAccount(tokenAccount)
 }

@@ -18,9 +18,9 @@ import (
 	"encoding/binary"
 	"fmt"
 
+	ag_solanago "github.com/Bestlend/solana-go"
+	ag_format "github.com/Bestlend/solana-go/text/format"
 	ag_binary "github.com/gagliardetto/binary"
-	ag_solanago "github.com/gagliardetto/solana-go"
-	ag_format "github.com/gagliardetto/solana-go/text/format"
 	ag_treeout "github.com/gagliardetto/treeout"
 )
 
@@ -107,22 +107,43 @@ func (inst *AdvanceNonceAccount) Validate() error {
 func (inst *AdvanceNonceAccount) EncodeToTree(parent ag_treeout.Branches) {
 	parent.Child(ag_format.Program(ProgramName, ProgramID)).
 		//
-		ParentFunc(func(programBranch ag_treeout.Branches) {
-			programBranch.Child(ag_format.Instruction("AdvanceNonceAccount")).
-				//
-				ParentFunc(func(instructionBranch ag_treeout.Branches) {
+		ParentFunc(
+			func(programBranch ag_treeout.Branches) {
+				programBranch.Child(ag_format.Instruction("AdvanceNonceAccount")).
+					//
+					ParentFunc(
+						func(instructionBranch ag_treeout.Branches) {
 
-					// Parameters of the instruction:
-					instructionBranch.Child("Params").ParentFunc(func(paramsBranch ag_treeout.Branches) {})
+							// Parameters of the instruction:
+							instructionBranch.Child("Params").ParentFunc(func(paramsBranch ag_treeout.Branches) {})
 
-					// Accounts of the instruction:
-					instructionBranch.Child("Accounts").ParentFunc(func(accountsBranch ag_treeout.Branches) {
-						accountsBranch.Child(ag_format.Meta("                  Nonce", inst.AccountMetaSlice[0]))
-						accountsBranch.Child(ag_format.Meta("SysVarRecentBlockHashes", inst.AccountMetaSlice[1]))
-						accountsBranch.Child(ag_format.Meta("         NonceAuthority", inst.AccountMetaSlice[2]))
-					})
-				})
-		})
+							// Accounts of the instruction:
+							instructionBranch.Child("Accounts").ParentFunc(
+								func(accountsBranch ag_treeout.Branches) {
+									accountsBranch.Child(
+										ag_format.Meta(
+											"                  Nonce",
+											inst.AccountMetaSlice[0],
+										),
+									)
+									accountsBranch.Child(
+										ag_format.Meta(
+											"SysVarRecentBlockHashes",
+											inst.AccountMetaSlice[1],
+										),
+									)
+									accountsBranch.Child(
+										ag_format.Meta(
+											"         NonceAuthority",
+											inst.AccountMetaSlice[2],
+										),
+									)
+								},
+							)
+						},
+					)
+			},
+		)
 }
 
 func (inst AdvanceNonceAccount) MarshalWithEncoder(encoder *ag_binary.Encoder) error {
@@ -138,7 +159,8 @@ func NewAdvanceNonceAccountInstruction(
 	// Accounts:
 	nonceAccount ag_solanago.PublicKey,
 	SysVarRecentBlockHashesPubkey ag_solanago.PublicKey,
-	nonceAuthorityAccount ag_solanago.PublicKey) *AdvanceNonceAccount {
+	nonceAuthorityAccount ag_solanago.PublicKey,
+) *AdvanceNonceAccount {
 	return NewAdvanceNonceAccountInstructionBuilder().
 		SetNonceAccount(nonceAccount).
 		SetSysVarRecentBlockHashesPubkeyAccount(SysVarRecentBlockHashesPubkey).

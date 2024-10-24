@@ -17,9 +17,9 @@ package token
 import (
 	"errors"
 
+	ag_solanago "github.com/Bestlend/solana-go"
+	ag_format "github.com/Bestlend/solana-go/text/format"
 	ag_binary "github.com/gagliardetto/binary"
-	ag_solanago "github.com/gagliardetto/solana-go"
-	ag_format "github.com/gagliardetto/solana-go/text/format"
 	ag_treeout "github.com/gagliardetto/treeout"
 )
 
@@ -121,24 +121,32 @@ func (inst *InitializeMint2) Validate() error {
 func (inst *InitializeMint2) EncodeToTree(parent ag_treeout.Branches) {
 	parent.Child(ag_format.Program(ProgramName, ProgramID)).
 		//
-		ParentFunc(func(programBranch ag_treeout.Branches) {
-			programBranch.Child(ag_format.Instruction("InitializeMint2")).
-				//
-				ParentFunc(func(instructionBranch ag_treeout.Branches) {
+		ParentFunc(
+			func(programBranch ag_treeout.Branches) {
+				programBranch.Child(ag_format.Instruction("InitializeMint2")).
+					//
+					ParentFunc(
+						func(instructionBranch ag_treeout.Branches) {
 
-					// Parameters of the instruction:
-					instructionBranch.Child("Params").ParentFunc(func(paramsBranch ag_treeout.Branches) {
-						paramsBranch.Child(ag_format.Param("             Decimals", *inst.Decimals))
-						paramsBranch.Child(ag_format.Param("        MintAuthority", *inst.MintAuthority))
-						paramsBranch.Child(ag_format.Param("FreezeAuthority (OPT)", inst.FreezeAuthority))
-					})
+							// Parameters of the instruction:
+							instructionBranch.Child("Params").ParentFunc(
+								func(paramsBranch ag_treeout.Branches) {
+									paramsBranch.Child(ag_format.Param("             Decimals", *inst.Decimals))
+									paramsBranch.Child(ag_format.Param("        MintAuthority", *inst.MintAuthority))
+									paramsBranch.Child(ag_format.Param("FreezeAuthority (OPT)", inst.FreezeAuthority))
+								},
+							)
 
-					// Accounts of the instruction:
-					instructionBranch.Child("Accounts").ParentFunc(func(accountsBranch ag_treeout.Branches) {
-						accountsBranch.Child(ag_format.Meta("mint", inst.AccountMetaSlice[0]))
-					})
-				})
-		})
+							// Accounts of the instruction:
+							instructionBranch.Child("Accounts").ParentFunc(
+								func(accountsBranch ag_treeout.Branches) {
+									accountsBranch.Child(ag_format.Meta("mint", inst.AccountMetaSlice[0]))
+								},
+							)
+						},
+					)
+			},
+		)
 }
 
 func (obj InitializeMint2) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
@@ -206,7 +214,8 @@ func NewInitializeMint2Instruction(
 	mint_authority ag_solanago.PublicKey,
 	freeze_authority ag_solanago.PublicKey,
 	// Accounts:
-	mint ag_solanago.PublicKey) *InitializeMint2 {
+	mint ag_solanago.PublicKey,
+) *InitializeMint2 {
 	return NewInitializeMint2InstructionBuilder().
 		SetDecimals(decimals).
 		SetMintAuthority(mint_authority).

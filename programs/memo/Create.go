@@ -17,9 +17,9 @@ package memo
 import (
 	"errors"
 	"fmt"
+	ag_solanago "github.com/Bestlend/solana-go"
+	ag_format "github.com/Bestlend/solana-go/text/format"
 	ag_binary "github.com/gagliardetto/binary"
-	ag_solanago "github.com/gagliardetto/solana-go"
-	ag_format "github.com/gagliardetto/solana-go/text/format"
 	ag_treeout "github.com/gagliardetto/treeout"
 )
 
@@ -92,20 +92,28 @@ func (inst *Create) Validate() error {
 }
 func (inst *Create) EncodeToTree(parent ag_treeout.Branches) {
 	parent.Child(ag_format.Program("Memo", ag_solanago.MemoProgramID)).
-		ParentFunc(func(programBranch ag_treeout.Branches) {
-			programBranch.Child(ag_format.Instruction("Create")).
-				ParentFunc(func(instructionBranch ag_treeout.Branches) {
-					// Parameters of the instruction:
-					instructionBranch.Child("Params").ParentFunc(func(paramsBranch ag_treeout.Branches) {
-						paramsBranch.Child(ag_format.Param("Message", inst.Message))
-					})
+		ParentFunc(
+			func(programBranch ag_treeout.Branches) {
+				programBranch.Child(ag_format.Instruction("Create")).
+					ParentFunc(
+						func(instructionBranch ag_treeout.Branches) {
+							// Parameters of the instruction:
+							instructionBranch.Child("Params").ParentFunc(
+								func(paramsBranch ag_treeout.Branches) {
+									paramsBranch.Child(ag_format.Param("Message", inst.Message))
+								},
+							)
 
-					// Accounts of the instruction:
-					instructionBranch.Child("Accounts").ParentFunc(func(accountsBranch ag_treeout.Branches) {
-						accountsBranch.Child(ag_format.Meta("Signer", inst.AccountMetaSlice[0]))
-					})
-				})
-		})
+							// Accounts of the instruction:
+							instructionBranch.Child("Accounts").ParentFunc(
+								func(accountsBranch ag_treeout.Branches) {
+									accountsBranch.Child(ag_format.Meta("Signer", inst.AccountMetaSlice[0]))
+								},
+							)
+						},
+					)
+			},
+		)
 }
 
 func (inst Create) MarshalWithEncoder(encoder *ag_binary.Encoder) error {
@@ -135,7 +143,8 @@ func NewMemoInstruction(
 	// Parameters:
 	message []byte,
 	// Accounts:
-	signer ag_solanago.PublicKey) *Create {
+	signer ag_solanago.PublicKey,
+) *Create {
 	return NewMemoInstructionBuilder().
 		SetMessage(message).
 		SetSigner(signer)

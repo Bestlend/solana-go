@@ -21,11 +21,11 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/gagliardetto/solana-go/rpc"
+	"github.com/Bestlend/solana-go/rpc"
 
-	"github.com/gagliardetto/solana-go"
-	"github.com/gagliardetto/solana-go/programs/tokenregistry"
-	"github.com/gagliardetto/solana-go/text"
+	"github.com/Bestlend/solana-go"
+	"github.com/Bestlend/solana-go/programs/tokenregistry"
+	"github.com/Bestlend/solana-go/text"
 	"github.com/spf13/cobra"
 )
 

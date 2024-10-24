@@ -18,9 +18,9 @@ import (
 	"errors"
 	"fmt"
 
+	"github.com/Bestlend/solana-go"
+	"github.com/Bestlend/solana-go/text/format"
 	bin "github.com/gagliardetto/binary"
-	"github.com/gagliardetto/solana-go"
-	"github.com/gagliardetto/solana-go/text/format"
 	"github.com/gagliardetto/treeout"
 )
 
@@ -151,30 +151,52 @@ func (inst Initialize) Build() *Instruction {
 func (inst *Initialize) EncodeToTree(parent treeout.Branches) {
 	parent.Child(format.Program(ProgramName, ProgramID)).
 		//
-		ParentFunc(func(programBranch treeout.Branches) {
-			programBranch.Child(format.Instruction("Initialize")).
-				//
-				ParentFunc(func(instructionBranch treeout.Branches) {
-					// Parameters of the instruction:
-					instructionBranch.Child("Params").ParentFunc(func(paramsBranch treeout.Branches) {
-						paramsBranch.Child("Authorized").ParentFunc(func(authBranch treeout.Branches) {
-							authBranch.Child(format.Account("    Staker", *inst.Authorized.Staker))
-							authBranch.Child(format.Account("Withdrawer", *inst.Authorized.Withdrawer))
-						})
-						paramsBranch.Child("Lockup").ParentFunc(func(authBranch treeout.Branches) {
-							authBranch.Child(format.Param("UnixTimestamp", inst.Lockup.UnixTimestamp))
-							authBranch.Child(format.Param("        Epoch", inst.Lockup.Epoch))
-							authBranch.Child(format.Account("    Custodian", *inst.Lockup.Custodian))
-						})
-					})
+		ParentFunc(
+			func(programBranch treeout.Branches) {
+				programBranch.Child(format.Instruction("Initialize")).
+					//
+					ParentFunc(
+						func(instructionBranch treeout.Branches) {
+							// Parameters of the instruction:
+							instructionBranch.Child("Params").ParentFunc(
+								func(paramsBranch treeout.Branches) {
+									paramsBranch.Child("Authorized").ParentFunc(
+										func(authBranch treeout.Branches) {
+											authBranch.Child(format.Account("    Staker", *inst.Authorized.Staker))
+											authBranch.Child(format.Account("Withdrawer", *inst.Authorized.Withdrawer))
+										},
+									)
+									paramsBranch.Child("Lockup").ParentFunc(
+										func(authBranch treeout.Branches) {
+											authBranch.Child(format.Param("UnixTimestamp", inst.Lockup.UnixTimestamp))
+											authBranch.Child(format.Param("        Epoch", inst.Lockup.Epoch))
+											authBranch.Child(format.Account("    Custodian", *inst.Lockup.Custodian))
+										},
+									)
+								},
+							)
 
-					// Accounts of the instruction:
-					instructionBranch.Child("Accounts").ParentFunc(func(accountsBranch treeout.Branches) {
-						accountsBranch.Child(format.Meta("           StakeAccount", inst.AccountMetaSlice.Get(0)))
-						accountsBranch.Child(format.Meta("           RentSysvar", inst.AccountMetaSlice.Get(1)))
-					})
-				})
-		})
+							// Accounts of the instruction:
+							instructionBranch.Child("Accounts").ParentFunc(
+								func(accountsBranch treeout.Branches) {
+									accountsBranch.Child(
+										format.Meta(
+											"           StakeAccount",
+											inst.AccountMetaSlice.Get(0),
+										),
+									)
+									accountsBranch.Child(
+										format.Meta(
+											"           RentSysvar",
+											inst.AccountMetaSlice.Get(1),
+										),
+									)
+								},
+							)
+						},
+					)
+			},
+		)
 }
 
 // NewInitializeInstructionBuilder creates a new `Initialize` instruction builder.

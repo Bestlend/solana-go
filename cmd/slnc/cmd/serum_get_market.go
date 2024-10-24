@@ -23,9 +23,9 @@ import (
 	"math/big"
 	"strings"
 
-	"github.com/gagliardetto/solana-go"
-	"github.com/gagliardetto/solana-go/programs/serum"
-	"github.com/gagliardetto/solana-go/rpc"
+	"github.com/Bestlend/solana-go"
+	"github.com/Bestlend/solana-go/programs/serum"
+	"github.com/Bestlend/solana-go/rpc"
 	"github.com/ryanuber/columnize"
 	"github.com/spf13/cobra"
 )
@@ -92,7 +92,13 @@ type orderBookEntry struct {
 	quantity *big.Float
 }
 
-func getOrderBook(ctx context.Context, market *serum.MarketMeta, cli *rpc.Client, address solana.PublicKey, desc bool) (out []*orderBookEntry, totalSize *big.Float, err error) {
+func getOrderBook(
+	ctx context.Context,
+	market *serum.MarketMeta,
+	cli *rpc.Client,
+	address solana.PublicKey,
+	desc bool,
+) (out []*orderBookEntry, totalSize *big.Float, err error) {
 	var o serum.Orderbook
 	if err := cli.GetAccountDataInto(ctx, address, &o); err != nil {
 		return nil, nil, fmt.Errorf("getting orderbook: %w", err)
@@ -101,26 +107,29 @@ func getOrderBook(ctx context.Context, market *serum.MarketMeta, cli *rpc.Client
 	limit := 20
 	levels := [][]*big.Int{}
 
-	o.Items(desc, func(node *serum.SlabLeafNode) error {
-		quantity := big.NewInt(int64(node.Quantity))
-		price := node.GetPrice()
-		if len(levels) > 0 && levels[len(levels)-1][0].Cmp(price) == 0 {
-			current := levels[len(levels)-1][1]
-			levels[len(levels)-1][1] = new(big.Int).Add(current, quantity)
-		} else if len(levels) == limit {
-			return fmt.Errorf("done")
-		} else {
-			levels = append(levels, []*big.Int{price, quantity})
-		}
-		return nil
-	})
+	o.Items(
+		desc, func(node *serum.SlabLeafNode) error {
+			quantity := big.NewInt(int64(node.Quantity))
+			price := node.GetPrice()
+			if len(levels) > 0 && levels[len(levels)-1][0].Cmp(price) == 0 {
+				current := levels[len(levels)-1][1]
+				levels[len(levels)-1][1] = new(big.Int).Add(current, quantity)
+			} else if len(levels) == limit {
+				return fmt.Errorf("done")
+			} else {
+				levels = append(levels, []*big.Int{price, quantity})
+			}
+			return nil
+		},
+	)
 
 	totalSize = big.NewFloat(0)
 	for _, level := range levels {
 		price := market.PriceLotsToNumber(level[0])
 		qty := market.BaseSizeLotsToNumber(level[1])
 		totalSize = new(big.Float).Add(totalSize, qty)
-		out = append(out,
+		out = append(
+			out,
 			&orderBookEntry{
 				price:    price,
 				quantity: qty,
@@ -153,29 +162,37 @@ func outputOrderBook(entries []*orderBookEntry, totalSize *big.Float, reverse bo
 		entry := entries[i]
 		cumulativeSize = new(big.Float).Add(cumulativeSize, entry.quantity)
 		sizePercent := new(big.Float).Mul(new(big.Float).Quo(cumulativeSize, total), new(big.Float).SetInt64(100))
-		rows = append(rows, &orderBookRow{
-			price:    entry.price.String(),
-			quantity: entry.quantity.String(),
-			depth:    depth(sizePercent),
-		})
+		rows = append(
+			rows, &orderBookRow{
+				price:    entry.price.String(),
+				quantity: entry.quantity.String(),
+				depth:    depth(sizePercent),
+			},
+		)
 	}
 
 	if reverse {
 		for i := len(entries) - 1; i >= 0; i-- {
-			out = append(out, fmt.Sprintf("%s | %s | %s",
-				rows[i].quantity,
-				rows[i].price,
-				rows[i].depth,
-			))
+			out = append(
+				out, fmt.Sprintf(
+					"%s | %s | %s",
+					rows[i].quantity,
+					rows[i].price,
+					rows[i].depth,
+				),
+			)
 		}
 		return
 	}
 	for i := 0; i < len(rows); i++ {
-		out = append(out, fmt.Sprintf("%s | %s | %s",
-			rows[i].quantity,
-			rows[i].price,
-			rows[i].depth,
-		))
+		out = append(
+			out, fmt.Sprintf(
+				"%s | %s | %s",
+				rows[i].quantity,
+				rows[i].price,
+				rows[i].depth,
+			),
+		)
 	}
 	return
 }

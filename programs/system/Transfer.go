@@ -19,9 +19,9 @@ import (
 	"errors"
 	"fmt"
 
+	ag_solanago "github.com/Bestlend/solana-go"
+	ag_format "github.com/Bestlend/solana-go/text/format"
 	ag_binary "github.com/gagliardetto/binary"
-	ag_solanago "github.com/gagliardetto/solana-go"
-	ag_format "github.com/gagliardetto/solana-go/text/format"
 	ag_treeout "github.com/gagliardetto/treeout"
 )
 
@@ -109,23 +109,31 @@ func (inst *Transfer) Validate() error {
 func (inst *Transfer) EncodeToTree(parent ag_treeout.Branches) {
 	parent.Child(ag_format.Program(ProgramName, ProgramID)).
 		//
-		ParentFunc(func(programBranch ag_treeout.Branches) {
-			programBranch.Child(ag_format.Instruction("Transfer")).
-				//
-				ParentFunc(func(instructionBranch ag_treeout.Branches) {
+		ParentFunc(
+			func(programBranch ag_treeout.Branches) {
+				programBranch.Child(ag_format.Instruction("Transfer")).
+					//
+					ParentFunc(
+						func(instructionBranch ag_treeout.Branches) {
 
-					// Parameters of the instruction:
-					instructionBranch.Child("Params").ParentFunc(func(paramsBranch ag_treeout.Branches) {
-						paramsBranch.Child(ag_format.Param("Lamports", *inst.Lamports))
-					})
+							// Parameters of the instruction:
+							instructionBranch.Child("Params").ParentFunc(
+								func(paramsBranch ag_treeout.Branches) {
+									paramsBranch.Child(ag_format.Param("Lamports", *inst.Lamports))
+								},
+							)
 
-					// Accounts of the instruction:
-					instructionBranch.Child("Accounts").ParentFunc(func(accountsBranch ag_treeout.Branches) {
-						accountsBranch.Child(ag_format.Meta("  Funding", inst.AccountMetaSlice[0]))
-						accountsBranch.Child(ag_format.Meta("Recipient", inst.AccountMetaSlice[1]))
-					})
-				})
-		})
+							// Accounts of the instruction:
+							instructionBranch.Child("Accounts").ParentFunc(
+								func(accountsBranch ag_treeout.Branches) {
+									accountsBranch.Child(ag_format.Meta("  Funding", inst.AccountMetaSlice[0]))
+									accountsBranch.Child(ag_format.Meta("Recipient", inst.AccountMetaSlice[1]))
+								},
+							)
+						},
+					)
+			},
+		)
 }
 
 func (inst Transfer) MarshalWithEncoder(encoder *ag_binary.Encoder) error {
@@ -156,7 +164,8 @@ func NewTransferInstruction(
 	lamports uint64,
 	// Accounts:
 	fundingAccount ag_solanago.PublicKey,
-	recipientAccount ag_solanago.PublicKey) *Transfer {
+	recipientAccount ag_solanago.PublicKey,
+) *Transfer {
 	return NewTransferInstructionBuilder().
 		SetLamports(lamports).
 		SetFundingAccount(fundingAccount).

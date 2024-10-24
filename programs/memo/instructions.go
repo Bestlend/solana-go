@@ -17,10 +17,10 @@ package memo
 import (
 	"bytes"
 	"fmt"
+	ag_solanago "github.com/Bestlend/solana-go"
+	ag_text "github.com/Bestlend/solana-go/text"
 	"github.com/davecgh/go-spew/spew"
 	ag_binary "github.com/gagliardetto/binary"
-	ag_solanago "github.com/gagliardetto/solana-go"
-	ag_text "github.com/gagliardetto/solana-go/text"
 	"github.com/gagliardetto/treeout"
 )
 

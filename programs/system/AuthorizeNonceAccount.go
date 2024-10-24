@@ -19,9 +19,9 @@ import (
 	"errors"
 	"fmt"
 
+	ag_solanago "github.com/Bestlend/solana-go"
+	ag_format "github.com/Bestlend/solana-go/text/format"
 	ag_binary "github.com/gagliardetto/binary"
-	ag_solanago "github.com/gagliardetto/solana-go"
-	ag_format "github.com/gagliardetto/solana-go/text/format"
 	ag_treeout "github.com/gagliardetto/treeout"
 )
 
@@ -109,23 +109,31 @@ func (inst *AuthorizeNonceAccount) Validate() error {
 func (inst *AuthorizeNonceAccount) EncodeToTree(parent ag_treeout.Branches) {
 	parent.Child(ag_format.Program(ProgramName, ProgramID)).
 		//
-		ParentFunc(func(programBranch ag_treeout.Branches) {
-			programBranch.Child(ag_format.Instruction("AuthorizeNonceAccount")).
-				//
-				ParentFunc(func(instructionBranch ag_treeout.Branches) {
+		ParentFunc(
+			func(programBranch ag_treeout.Branches) {
+				programBranch.Child(ag_format.Instruction("AuthorizeNonceAccount")).
+					//
+					ParentFunc(
+						func(instructionBranch ag_treeout.Branches) {
 
-					// Parameters of the instruction:
-					instructionBranch.Child("Params").ParentFunc(func(paramsBranch ag_treeout.Branches) {
-						paramsBranch.Child(ag_format.Param("Authorized", *inst.Authorized))
-					})
+							// Parameters of the instruction:
+							instructionBranch.Child("Params").ParentFunc(
+								func(paramsBranch ag_treeout.Branches) {
+									paramsBranch.Child(ag_format.Param("Authorized", *inst.Authorized))
+								},
+							)
 
-					// Accounts of the instruction:
-					instructionBranch.Child("Accounts").ParentFunc(func(accountsBranch ag_treeout.Branches) {
-						accountsBranch.Child(ag_format.Meta("         Nonce", inst.AccountMetaSlice[0]))
-						accountsBranch.Child(ag_format.Meta("NonceAuthority", inst.AccountMetaSlice[1]))
-					})
-				})
-		})
+							// Accounts of the instruction:
+							instructionBranch.Child("Accounts").ParentFunc(
+								func(accountsBranch ag_treeout.Branches) {
+									accountsBranch.Child(ag_format.Meta("         Nonce", inst.AccountMetaSlice[0]))
+									accountsBranch.Child(ag_format.Meta("NonceAuthority", inst.AccountMetaSlice[1]))
+								},
+							)
+						},
+					)
+			},
+		)
 }
 
 func (inst AuthorizeNonceAccount) MarshalWithEncoder(encoder *ag_binary.Encoder) error {
@@ -156,7 +164,8 @@ func NewAuthorizeNonceAccountInstruction(
 	authorized ag_solanago.PublicKey,
 	// Accounts:
 	nonceAccount ag_solanago.PublicKey,
-	nonceAuthorityAccount ag_solanago.PublicKey) *AuthorizeNonceAccount {
+	nonceAuthorityAccount ag_solanago.PublicKey,
+) *AuthorizeNonceAccount {
 	return NewAuthorizeNonceAccountInstructionBuilder().
 		SetAuthorized(authorized).
 		SetNonceAccount(nonceAccount).

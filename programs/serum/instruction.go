@@ -21,9 +21,9 @@ import (
 	"encoding/binary"
 	"fmt"
 
+	"github.com/Bestlend/solana-go"
+	"github.com/Bestlend/solana-go/text"
 	bin "github.com/gagliardetto/binary"
-	"github.com/gagliardetto/solana-go"
-	"github.com/gagliardetto/solana-go/text"
 )
 
 func init() {
@@ -55,24 +55,26 @@ func DecodeInstruction(accounts []*solana.AccountMeta, data []byte) (*Instructio
 	return &inst, nil
 }
 
-var InstructionDefVariant = bin.NewVariantDefinition(bin.Uint32TypeIDEncoding, []bin.VariantType{
-	{Name: "initialize_market", Type: (*InstructionInitializeMarket)(nil)},
-	{Name: "new_order", Type: (*InstructionNewOrder)(nil)},
-	{Name: "match_orders", Type: (*InstructionMatchOrder)(nil)},
-	{Name: "consume_events", Type: (*InstructionConsumeEvents)(nil)},
-	{Name: "cancel_order", Type: (*InstructionCancelOrder)(nil)},
-	{Name: "settle_funds", Type: (*InstructionSettleFunds)(nil)},
-	{Name: "cancel_order_by_client_id", Type: (*InstructionCancelOrderByClientId)(nil)},
-	{Name: "disable_market", Type: (*InstructionDisableMarketAccounts)(nil)},
-	{Name: "sweep_fees", Type: (*InstructionSweepFees)(nil)},
-	{Name: "new_order_v2", Type: (*InstructionNewOrderV2)(nil)},
+var InstructionDefVariant = bin.NewVariantDefinition(
+	bin.Uint32TypeIDEncoding, []bin.VariantType{
+		{Name: "initialize_market", Type: (*InstructionInitializeMarket)(nil)},
+		{Name: "new_order", Type: (*InstructionNewOrder)(nil)},
+		{Name: "match_orders", Type: (*InstructionMatchOrder)(nil)},
+		{Name: "consume_events", Type: (*InstructionConsumeEvents)(nil)},
+		{Name: "cancel_order", Type: (*InstructionCancelOrder)(nil)},
+		{Name: "settle_funds", Type: (*InstructionSettleFunds)(nil)},
+		{Name: "cancel_order_by_client_id", Type: (*InstructionCancelOrderByClientId)(nil)},
+		{Name: "disable_market", Type: (*InstructionDisableMarketAccounts)(nil)},
+		{Name: "sweep_fees", Type: (*InstructionSweepFees)(nil)},
+		{Name: "new_order_v2", Type: (*InstructionNewOrderV2)(nil)},
 
-	// Added in DEX V3
-	{Name: "new_order_v3", Type: (*InstructionNewOrderV3)(nil)},
-	{Name: "cancel_order_v2", Type: (*InstructionCancelOrderV2)(nil)},
-	{Name: "cancel_order_by_client_id_v2", Type: (*InstructionCancelOrderByClientIdV2)(nil)},
-	{Name: "send_take", Type: (*InstructionSendTake)(nil)},
-})
+		// Added in DEX V3
+		{Name: "new_order_v3", Type: (*InstructionNewOrderV3)(nil)},
+		{Name: "cancel_order_v2", Type: (*InstructionCancelOrderV2)(nil)},
+		{Name: "cancel_order_by_client_id_v2", Type: (*InstructionCancelOrderByClientIdV2)(nil)},
+		{Name: "send_take", Type: (*InstructionSendTake)(nil)},
+	},
+)
 
 type Instruction struct {
 	bin.BaseVariant
@@ -338,7 +340,10 @@ type InstructionCancelOrderByClientId struct {
 
 func (i *InstructionCancelOrderByClientId) SetAccounts(accounts []*solana.AccountMeta) error {
 	if len(accounts) < 4 {
-		return fmt.Errorf("insufficient account, Cancel Order By Client Id requires at-least 4 accounts not %d", len(accounts))
+		return fmt.Errorf(
+			"insufficient account, Cancel Order By Client Id requires at-least 4 accounts not %d",
+			len(accounts),
+		)
 	}
 	i.Accounts = &CancelOrderByClientIdAccounts{
 		Market:       accounts[0],
@@ -440,7 +445,10 @@ type InstructionNewOrderV2 struct {
 
 func (i *InstructionNewOrderV2) SetAccounts(accounts []*solana.AccountMeta) error {
 	if len(accounts) < 9 {
-		return fmt.Errorf("insufficient account, New Order V2 requires at-least 9 accounts + 1 optional not %d", len(accounts))
+		return fmt.Errorf(
+			"insufficient account, New Order V2 requires at-least 9 accounts + 1 optional not %d",
+			len(accounts),
+		)
 	}
 
 	i.Accounts = &NewOrderV2Accounts{
@@ -566,7 +574,10 @@ type InstructionCancelOrderByClientIdV2 struct {
 
 func (i *InstructionCancelOrderByClientIdV2) SetAccounts(accounts []*solana.AccountMeta) error {
 	if len(accounts) < 6 {
-		return fmt.Errorf("insufficient account, Cancel Order By Client Id V2 requires at-least 6 accounts not %d", len(accounts))
+		return fmt.Errorf(
+			"insufficient account, Cancel Order By Client Id V2 requires at-least 6 accounts not %d",
+			len(accounts),
+		)
 	}
 	i.Accounts = &CancelOrderByClientIdV2Accounts{
 		Market:     accounts[0],

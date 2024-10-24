@@ -20,8 +20,8 @@ import (
 	"context"
 	"errors"
 
+	"github.com/Bestlend/solana-go"
 	bin "github.com/gagliardetto/binary"
-	"github.com/gagliardetto/solana-go"
 )
 
 // GetAccountInfo returns all information associated with the account of provided publicKey.
@@ -48,7 +48,11 @@ func (cl *Client) GetAccountDataInto(ctx context.Context, account solana.PublicK
 
 // GetAccountDataBorshInto decodes the borsh binary data and populates
 // the provided `inVar` parameter with all data associated with the account of provided publicKey.
-func (cl *Client) GetAccountDataBorshInto(ctx context.Context, account solana.PublicKey, inVar interface{}) (err error) {
+func (cl *Client) GetAccountDataBorshInto(
+	ctx context.Context,
+	account solana.PublicKey,
+	inVar interface{},
+) (err error) {
 	resp, err := cl.GetAccountInfo(ctx, account)
 	if err != nil {
 		return err

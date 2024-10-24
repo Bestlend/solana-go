@@ -5,7 +5,7 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/gagliardetto/solana-go/rpc/jsonrpc"
+	"github.com/Bestlend/solana-go/rpc/jsonrpc"
 	"go.uber.org/ratelimit"
 )
 
@@ -33,7 +33,12 @@ func NewWithRateLimit(
 	}
 }
 
-func (wr *clientWithRateLimiting) CallForInto(ctx context.Context, out interface{}, method string, params []interface{}) error {
+func (wr *clientWithRateLimiting) CallForInto(
+	ctx context.Context,
+	out interface{},
+	method string,
+	params []interface{},
+) error {
 	wr.rateLimiter.Take()
 	return wr.rpcClient.CallForInto(ctx, &out, method, params)
 }

@@ -25,10 +25,10 @@ import (
 	"testing"
 	"time"
 
+	"github.com/Bestlend/solana-go"
+	"github.com/Bestlend/solana-go/diff"
+	"github.com/Bestlend/solana-go/rpc"
 	bin "github.com/gagliardetto/binary"
-	"github.com/gagliardetto/solana-go"
-	"github.com/gagliardetto/solana-go/diff"
-	"github.com/gagliardetto/solana-go/rpc"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -128,12 +128,14 @@ func Test_fill(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T) {
-			assert.Equal(t, test.expectIsFill, test.e.Flag.IsFill())
-			assert.Equal(t, test.expectIsOut, test.e.Flag.IsOut())
-			assert.Equal(t, test.expectIsBid, test.e.Flag.IsBid())
-			assert.Equal(t, test.expectIsMaker, test.e.Flag.IsMaker())
-		})
+		t.Run(
+			test.name, func(t *testing.T) {
+				assert.Equal(t, test.expectIsFill, test.e.Flag.IsFill())
+				assert.Equal(t, test.expectIsOut, test.e.Flag.IsOut())
+				assert.Equal(t, test.expectIsBid, test.e.Flag.IsBid())
+				assert.Equal(t, test.expectIsMaker, test.e.Flag.IsMaker())
+			},
+		)
 	}
 }
 
@@ -166,9 +168,13 @@ func TestDecoder_EventQueue_DiffManual(t *testing.T) {
 
 	fmt.Println("")
 	fmt.Println("Processed diff lines")
-	diff.Diff(oldQueue, newQueue, diff.OnEvent(func(event diff.Event) {
-		if match, _ := event.Match("Events[#]"); match {
-			fmt.Printf("Event %s => %v\n", event.Kind, event.Element())
-		}
-	}))
+	diff.Diff(
+		oldQueue, newQueue, diff.OnEvent(
+			func(event diff.Event) {
+				if match, _ := event.Match("Events[#]"); match {
+					fmt.Printf("Event %s => %v\n", event.Kind, event.Element())
+				}
+			},
+		),
+	)
 }

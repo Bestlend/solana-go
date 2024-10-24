@@ -17,9 +17,9 @@ package token
 import (
 	"errors"
 
+	ag_solanago "github.com/Bestlend/solana-go"
+	ag_format "github.com/Bestlend/solana-go/text/format"
 	ag_binary "github.com/gagliardetto/binary"
-	ag_solanago "github.com/gagliardetto/solana-go"
-	ag_format "github.com/gagliardetto/solana-go/text/format"
 	ag_treeout "github.com/gagliardetto/treeout"
 )
 
@@ -150,23 +150,29 @@ func (inst *InitializeAccount) Validate() error {
 func (inst *InitializeAccount) EncodeToTree(parent ag_treeout.Branches) {
 	parent.Child(ag_format.Program(ProgramName, ProgramID)).
 		//
-		ParentFunc(func(programBranch ag_treeout.Branches) {
-			programBranch.Child(ag_format.Instruction("InitializeAccount")).
-				//
-				ParentFunc(func(instructionBranch ag_treeout.Branches) {
+		ParentFunc(
+			func(programBranch ag_treeout.Branches) {
+				programBranch.Child(ag_format.Instruction("InitializeAccount")).
+					//
+					ParentFunc(
+						func(instructionBranch ag_treeout.Branches) {
 
-					// Parameters of the instruction:
-					instructionBranch.Child("Params").ParentFunc(func(paramsBranch ag_treeout.Branches) {})
+							// Parameters of the instruction:
+							instructionBranch.Child("Params").ParentFunc(func(paramsBranch ag_treeout.Branches) {})
 
-					// Accounts of the instruction:
-					instructionBranch.Child("Accounts").ParentFunc(func(accountsBranch ag_treeout.Branches) {
-						accountsBranch.Child(ag_format.Meta("   account", inst.AccountMetaSlice[0]))
-						accountsBranch.Child(ag_format.Meta("      mint", inst.AccountMetaSlice[1]))
-						accountsBranch.Child(ag_format.Meta("     owner", inst.AccountMetaSlice[2]))
-						accountsBranch.Child(ag_format.Meta("SysVarRent", inst.AccountMetaSlice[3]))
-					})
-				})
-		})
+							// Accounts of the instruction:
+							instructionBranch.Child("Accounts").ParentFunc(
+								func(accountsBranch ag_treeout.Branches) {
+									accountsBranch.Child(ag_format.Meta("   account", inst.AccountMetaSlice[0]))
+									accountsBranch.Child(ag_format.Meta("      mint", inst.AccountMetaSlice[1]))
+									accountsBranch.Child(ag_format.Meta("     owner", inst.AccountMetaSlice[2]))
+									accountsBranch.Child(ag_format.Meta("SysVarRent", inst.AccountMetaSlice[3]))
+								},
+							)
+						},
+					)
+			},
+		)
 }
 
 func (obj InitializeAccount) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {
@@ -182,7 +188,8 @@ func NewInitializeAccountInstruction(
 	account ag_solanago.PublicKey,
 	mint ag_solanago.PublicKey,
 	owner ag_solanago.PublicKey,
-	SysVarRentPubkey ag_solanago.PublicKey) *InitializeAccount {
+	SysVarRentPubkey ag_solanago.PublicKey,
+) *InitializeAccount {
 	return NewInitializeAccountInstructionBuilder().
 		SetAccount(account).
 		SetMintAccount(mint).

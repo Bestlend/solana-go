@@ -25,8 +25,8 @@ import (
 	"io/ioutil"
 	"testing"
 
+	"github.com/Bestlend/solana-go"
 	bin "github.com/gagliardetto/binary"
-	"github.com/gagliardetto/solana-go"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -102,59 +102,65 @@ func TestDecoder_Orderbook(t *testing.T) {
 	assert.Equal(t, uint32(37), ob.FreeListHead)
 	assert.Equal(t, uint32(17), ob.LeafCount)
 	assert.Equal(t, 101, len(ob.Nodes))
-	assert.Equal(t, &Slab{
-		BaseVariant: bin.BaseVariant{
-			TypeID: bin.TypeIDFromUint32(1, binary.LittleEndian),
-			Impl: &SlabInnerNode{
-				PrefixLen: 57,
-				Key: bin.Uint128{
-					Lo: 1858,
-					Hi: 18446744073702344907,
-				},
-				Children: [2]uint32{55, 56},
-				Padding: [40]byte{
-					0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-					0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-					0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-					0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-				},
-			},
-		},
-	}, ob.Nodes[0])
-	assert.Equal(t, &Slab{
-		BaseVariant: bin.BaseVariant{
-			TypeID: bin.TypeIDFromUint32(3, binary.LittleEndian),
-			Impl: &SlabFreeNode{
-				Next: 2,
-				Padding: [64]byte{
-					0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-					0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-					0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-					0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-					0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-					0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-					0x00, 0x00, 0x00, 0x00,
+	assert.Equal(
+		t, &Slab{
+			BaseVariant: bin.BaseVariant{
+				TypeID: bin.TypeIDFromUint32(1, binary.LittleEndian),
+				Impl: &SlabInnerNode{
+					PrefixLen: 57,
+					Key: bin.Uint128{
+						Lo: 1858,
+						Hi: 18446744073702344907,
+					},
+					Children: [2]uint32{55, 56},
+					Padding: [40]byte{
+						0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+						0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+						0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+						0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+					},
 				},
 			},
-		},
-	}, ob.Nodes[1])
-	assert.Equal(t, &Slab{
-		BaseVariant: bin.BaseVariant{
-			TypeID: bin.TypeIDFromUint32(2, binary.LittleEndian),
-			Impl: &SlabLeafNode{
-				OwnerSlot: 1,
-				FeeTier:   5,
-				Padding:   [2]byte{0x00, 0x00},
-				Key: bin.Uint128{
-					Lo: 1820,
-					Hi: 18446744073702358592,
+		}, ob.Nodes[0],
+	)
+	assert.Equal(
+		t, &Slab{
+			BaseVariant: bin.BaseVariant{
+				TypeID: bin.TypeIDFromUint32(3, binary.LittleEndian),
+				Impl: &SlabFreeNode{
+					Next: 2,
+					Padding: [64]byte{
+						0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+						0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+						0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+						0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+						0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+						0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+						0x00, 0x00, 0x00, 0x00,
+					},
 				},
-				Owner:         solana.MustPublicKeyFromBase58("77jtrBDbUvwsdNKeq1ERUBcg8kk2hNTzf5E4iRihNgTh"),
-				Quantity:      38918,
-				ClientOrderId: 14114313590397044635,
 			},
-		},
-	}, ob.Nodes[5])
+		}, ob.Nodes[1],
+	)
+	assert.Equal(
+		t, &Slab{
+			BaseVariant: bin.BaseVariant{
+				TypeID: bin.TypeIDFromUint32(2, binary.LittleEndian),
+				Impl: &SlabLeafNode{
+					OwnerSlot: 1,
+					FeeTier:   5,
+					Padding:   [2]byte{0x00, 0x00},
+					Key: bin.Uint128{
+						Lo: 1820,
+						Hi: 18446744073702358592,
+					},
+					Owner:         solana.MustPublicKeyFromBase58("77jtrBDbUvwsdNKeq1ERUBcg8kk2hNTzf5E4iRihNgTh"),
+					Quantity:      38918,
+					ClientOrderId: 14114313590397044635,
+				},
+			},
+		}, ob.Nodes[5],
+	)
 
 }
 
@@ -221,17 +227,19 @@ func TestDecoder_Slabs(t *testing.T) {
 	}
 
 	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T) {
-			cnt, err := hex.DecodeString(test.slabData)
-			require.NoError(t, err)
+		t.Run(
+			test.name, func(t *testing.T) {
+				cnt, err := hex.DecodeString(test.slabData)
+				require.NoError(t, err)
 
-			decoder := bin.NewBinDecoder(cnt)
-			var slab *Slab
-			err = decoder.Decode(&slab)
-			require.NoError(t, err)
+				decoder := bin.NewBinDecoder(cnt)
+				var slab *Slab
+				err = decoder.Decode(&slab)
+				require.NoError(t, err)
 
-			assert.Equal(t, test.expectSlab, slab)
-		})
+				assert.Equal(t, test.expectSlab, slab)
+			},
+		)
 
 	}
 }
@@ -267,13 +275,15 @@ func Test_OpenOrder_GetOrder(t *testing.T) {
 	openOrders := &OpenOrders{}
 	require.NoError(t, openOrders.Decode(readHexFile(t, openOrderData)))
 	o := openOrders.GetOrder(20)
-	assert.Equal(t, &Order{
-		ID: OrderID{
-			Hi: 0x0000000000000840,
-			Lo: 0xffffffffffacdefd,
-		},
-		Side: SideBid,
-	}, o)
+	assert.Equal(
+		t, &Order{
+			ID: OrderID{
+				Hi: 0x0000000000000840,
+				Lo: 0xffffffffffacdefd,
+			},
+			Side: SideBid,
+		}, o,
+	)
 	assert.Equal(t, o.SeqNum(), uint64(5447938))
 	assert.Equal(t, o.Price(), uint64(2112))
 }
@@ -366,14 +376,16 @@ func TestIsBitZero(t *testing.T) {
 		},
 	}
 	for _, test := range tests {
-		t.Run(test.name, func(t *testing.T) {
-			f, err := IsBitZero(test.value, test.index)
-			if test.expectError {
-				require.Error(t, err)
-			} else {
-				assert.NoError(t, err)
-				assert.Equal(t, f, test.expect)
-			}
-		})
+		t.Run(
+			test.name, func(t *testing.T) {
+				f, err := IsBitZero(test.value, test.index)
+				if test.expectError {
+					require.Error(t, err)
+				} else {
+					assert.NoError(t, err)
+					assert.Equal(t, f, test.expect)
+				}
+			},
+		)
 	}
 }

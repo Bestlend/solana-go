@@ -18,8 +18,8 @@ import (
 	"encoding/base64"
 	"testing"
 
+	"github.com/Bestlend/solana-go"
 	bin "github.com/gagliardetto/binary"
-	"github.com/gagliardetto/solana-go"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -38,7 +38,11 @@ func TestDecode(t *testing.T) {
 
 	assert.Equal(t, uint32(0), acc.Version)
 	assert.Equal(t, uint32(1), acc.State)
-	assert.Equal(t, solana.MustPublicKeyFromBase58("5omQJtDUHA3gMFdHEQg1zZSvcBUVzey5WaKWYRmqF1Vj"), acc.AuthorizedPubkey)
+	assert.Equal(
+		t,
+		solana.MustPublicKeyFromBase58("5omQJtDUHA3gMFdHEQg1zZSvcBUVzey5WaKWYRmqF1Vj"),
+		acc.AuthorizedPubkey,
+	)
 	assert.Equal(t, solana.MustPublicKeyFromBase58("8ksS6xXd7vzNrpZfBTf9gJ87Bma5AjnQ9baEcT7xH5QE"), acc.Nonce)
 	assert.Equal(t, uint64(5000), acc.FeeCalculator.LamportsPerSignature)
 }

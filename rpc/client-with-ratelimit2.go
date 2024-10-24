@@ -5,7 +5,7 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/gagliardetto/solana-go/rpc/jsonrpc"
+	"github.com/Bestlend/solana-go/rpc/jsonrpc"
 	"golang.org/x/time/rate"
 )
 
@@ -36,7 +36,12 @@ func NewWithLimiter(
 	}
 }
 
-func (wr *clientWithLimiter) CallForInto(ctx context.Context, out interface{}, method string, params []interface{}) error {
+func (wr *clientWithLimiter) CallForInto(
+	ctx context.Context,
+	out interface{},
+	method string,
+	params []interface{},
+) error {
 	err := wr.limiter.Wait(ctx)
 	if err != nil {
 		return err

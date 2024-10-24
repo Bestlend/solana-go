@@ -18,7 +18,7 @@ import (
 	stdjson "encoding/json"
 	"testing"
 
-	"github.com/gagliardetto/solana-go"
+	"github.com/Bestlend/solana-go"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -30,15 +30,18 @@ func TestData_base64_zstd(t *testing.T) {
 	err := data.UnmarshalJSON([]byte(in))
 	assert.NoError(t, err)
 
-	assert.Equal(t,
+	assert.Equal(
+		t,
 		[]byte("hello-world"),
 		data.GetBinary(),
 	)
-	assert.Equal(t,
+	assert.Equal(
+		t,
 		solana.EncodingBase64Zstd,
 		data.asDecodedBinary.Encoding,
 	)
-	assert.Equal(t,
+	assert.Equal(
+		t,
 		[]interface{}{
 			val,
 			"base64+zstd",
@@ -54,15 +57,18 @@ func TestData_base64_zstd_empty(t *testing.T) {
 	err := data.UnmarshalJSON([]byte(in))
 	assert.NoError(t, err)
 
-	assert.Equal(t,
+	assert.Equal(
+		t,
 		[]byte(""),
 		data.GetBinary(),
 	)
-	assert.Equal(t,
+	assert.Equal(
+		t,
 		solana.EncodingBase64Zstd,
 		data.asDecodedBinary.Encoding,
 	)
-	assert.Equal(t,
+	assert.Equal(
+		t,
 		[]interface{}{
 			"",
 			"base64+zstd",
@@ -78,11 +84,13 @@ func TestData_jsonParsed(t *testing.T) {
 	err := data.UnmarshalJSON([]byte(in))
 	assert.NoError(t, err)
 
-	assert.Equal(t,
+	assert.Equal(
+		t,
 		stdjson.RawMessage(in),
 		data.GetRawJSON(),
 	)
-	assert.Equal(t,
+	assert.Equal(
+		t,
 		map[string]interface{}{
 			"hello": "world",
 		},
@@ -97,11 +105,13 @@ func TestData_jsonParsed_empty(t *testing.T) {
 	err := data.UnmarshalJSON([]byte(in))
 	assert.NoError(t, err)
 
-	assert.Equal(t,
+	assert.Equal(
+		t,
 		stdjson.RawMessage(in),
 		data.GetRawJSON(),
 	)
-	assert.Equal(t,
+	assert.Equal(
+		t,
 		map[string]interface{}{},
 		mustJSONToInterface(mustAnyToJSON(data)),
 	)

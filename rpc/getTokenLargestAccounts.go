@@ -17,7 +17,7 @@ package rpc
 import (
 	"context"
 
-	"github.com/gagliardetto/solana-go"
+	"github.com/Bestlend/solana-go"
 )
 
 // GetTokenLargestAccounts returns the 20 largest accounts of a particular SPL Token type.
@@ -28,7 +28,8 @@ func (cl *Client) GetTokenLargestAccounts(
 ) (out *GetTokenLargestAccountsResult, err error) {
 	params := []interface{}{tokenMint}
 	if commitment != "" {
-		params = append(params,
+		params = append(
+			params,
 			M{"commitment": commitment},
 		)
 	}

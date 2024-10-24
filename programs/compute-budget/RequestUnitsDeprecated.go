@@ -17,9 +17,9 @@ package computebudget
 import (
 	"errors"
 
+	ag_solanago "github.com/Bestlend/solana-go"
+	ag_format "github.com/Bestlend/solana-go/text/format"
 	ag_binary "github.com/gagliardetto/binary"
-	ag_solanago "github.com/gagliardetto/solana-go"
-	ag_format "github.com/gagliardetto/solana-go/text/format"
 	ag_treeout "github.com/gagliardetto/treeout"
 )
 
@@ -93,18 +93,24 @@ func (inst *RequestUnitsDeprecated) Validate() error {
 func (inst *RequestUnitsDeprecated) EncodeToTree(parent ag_treeout.Branches) {
 	parent.Child(ag_format.Program(ProgramName, ProgramID)).
 		//
-		ParentFunc(func(programBranch ag_treeout.Branches) {
-			programBranch.Child(ag_format.Instruction("RequestUnitsDeprecated")).
-				//
-				ParentFunc(func(instructionBranch ag_treeout.Branches) {
+		ParentFunc(
+			func(programBranch ag_treeout.Branches) {
+				programBranch.Child(ag_format.Instruction("RequestUnitsDeprecated")).
+					//
+					ParentFunc(
+						func(instructionBranch ag_treeout.Branches) {
 
-					// Parameters of the instruction:
-					instructionBranch.Child("Params").ParentFunc(func(paramsBranch ag_treeout.Branches) {
-						paramsBranch.Child(ag_format.Param("        Units", inst.Units))
-						paramsBranch.Child(ag_format.Param("AdditionalFee", inst.AdditionalFee))
-					})
-				})
-		})
+							// Parameters of the instruction:
+							instructionBranch.Child("Params").ParentFunc(
+								func(paramsBranch ag_treeout.Branches) {
+									paramsBranch.Child(ag_format.Param("        Units", inst.Units))
+									paramsBranch.Child(ag_format.Param("AdditionalFee", inst.AdditionalFee))
+								},
+							)
+						},
+					)
+			},
+		)
 }
 
 func (obj RequestUnitsDeprecated) MarshalWithEncoder(encoder *ag_binary.Encoder) (err error) {

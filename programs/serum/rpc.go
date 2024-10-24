@@ -22,11 +22,11 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/Bestlend/solana-go"
+	"github.com/Bestlend/solana-go/rpc"
+	"github.com/Bestlend/solana-go/rpc/ws"
 	rice "github.com/GeertJohan/go.rice"
 	bin "github.com/gagliardetto/binary"
-	"github.com/gagliardetto/solana-go"
-	"github.com/gagliardetto/solana-go/rpc"
-	"github.com/gagliardetto/solana-go/rpc/ws"
 	"go.uber.org/zap"
 )
 
@@ -48,7 +48,11 @@ func KnownMarket() ([]*MarketMeta, error) {
 	return markets, nil
 }
 
-func FetchOpenOrders(ctx context.Context, rpcCli *rpc.Client, openOrdersAddr solana.PublicKey) (*OpenOrdersMeta, error) {
+func FetchOpenOrders(
+	ctx context.Context,
+	rpcCli *rpc.Client,
+	openOrdersAddr solana.PublicKey,
+) (*OpenOrdersMeta, error) {
 	acctInfo, err := rpcCli.GetAccountInfo(ctx, openOrdersAddr)
 	if err != nil {
 		return nil, fmt.Errorf("unable to get open orders account:%w", err)
@@ -118,7 +122,8 @@ func StreamOpenOrders(client *ws.Client) error {
 		err = bin.NewBinDecoder(res.Value.Account.Data.GetBinary()).Decode(&f)
 		if err != nil {
 			fmt.Println("***********************************", err)
-			zlog.Debug("unable to decoce account flag for account... skipping",
+			zlog.Debug(
+				"unable to decoce account flag for account... skipping",
 				zap.Stringer("account_address", res.Value.Pubkey),
 			)
 			continue

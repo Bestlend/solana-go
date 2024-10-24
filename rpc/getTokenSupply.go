@@ -17,7 +17,7 @@ package rpc
 import (
 	"context"
 
-	"github.com/gagliardetto/solana-go"
+	"github.com/Bestlend/solana-go"
 )
 
 // GetTokenSupply returns the total supply of an SPL Token type.
@@ -28,7 +28,8 @@ func (cl *Client) GetTokenSupply(
 ) (out *GetTokenSupplyResult, err error) {
 	params := []interface{}{tokenMint}
 	if commitment != "" {
-		params = append(params,
+		params = append(
+			params,
 			M{"commitment": commitment},
 		)
 	}

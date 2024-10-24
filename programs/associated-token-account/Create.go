@@ -18,9 +18,9 @@ import (
 	"errors"
 	"fmt"
 
+	solana "github.com/Bestlend/solana-go"
+	format "github.com/Bestlend/solana-go/text/format"
 	bin "github.com/gagliardetto/binary"
-	solana "github.com/gagliardetto/solana-go"
-	format "github.com/gagliardetto/solana-go/text/format"
 	treeout "github.com/gagliardetto/treeout"
 )
 
@@ -160,26 +160,67 @@ func (inst *Create) Validate() error {
 func (inst *Create) EncodeToTree(parent treeout.Branches) {
 	parent.Child(format.Program(ProgramName, ProgramID)).
 		//
-		ParentFunc(func(programBranch treeout.Branches) {
-			programBranch.Child(format.Instruction("Create")).
-				//
-				ParentFunc(func(instructionBranch treeout.Branches) {
+		ParentFunc(
+			func(programBranch treeout.Branches) {
+				programBranch.Child(format.Instruction("Create")).
+					//
+					ParentFunc(
+						func(instructionBranch treeout.Branches) {
 
-					// Parameters of the instruction:
-					instructionBranch.Child("Params[len=0]").ParentFunc(func(paramsBranch treeout.Branches) {})
+							// Parameters of the instruction:
+							instructionBranch.Child("Params[len=0]").ParentFunc(func(paramsBranch treeout.Branches) {})
 
-					// Accounts of the instruction:
-					instructionBranch.Child("Accounts[len=7").ParentFunc(func(accountsBranch treeout.Branches) {
-						accountsBranch.Child(format.Meta("                 payer", inst.AccountMetaSlice.Get(0)))
-						accountsBranch.Child(format.Meta("associatedTokenAddress", inst.AccountMetaSlice.Get(1)))
-						accountsBranch.Child(format.Meta("                wallet", inst.AccountMetaSlice.Get(2)))
-						accountsBranch.Child(format.Meta("             tokenMint", inst.AccountMetaSlice.Get(3)))
-						accountsBranch.Child(format.Meta("         systemProgram", inst.AccountMetaSlice.Get(4)))
-						accountsBranch.Child(format.Meta("          tokenProgram", inst.AccountMetaSlice.Get(5)))
-						accountsBranch.Child(format.Meta("            sysVarRent", inst.AccountMetaSlice.Get(6)))
-					})
-				})
-		})
+							// Accounts of the instruction:
+							instructionBranch.Child("Accounts[len=7").ParentFunc(
+								func(accountsBranch treeout.Branches) {
+									accountsBranch.Child(
+										format.Meta(
+											"                 payer",
+											inst.AccountMetaSlice.Get(0),
+										),
+									)
+									accountsBranch.Child(
+										format.Meta(
+											"associatedTokenAddress",
+											inst.AccountMetaSlice.Get(1),
+										),
+									)
+									accountsBranch.Child(
+										format.Meta(
+											"                wallet",
+											inst.AccountMetaSlice.Get(2),
+										),
+									)
+									accountsBranch.Child(
+										format.Meta(
+											"             tokenMint",
+											inst.AccountMetaSlice.Get(3),
+										),
+									)
+									accountsBranch.Child(
+										format.Meta(
+											"         systemProgram",
+											inst.AccountMetaSlice.Get(4),
+										),
+									)
+									accountsBranch.Child(
+										format.Meta(
+											"          tokenProgram",
+											inst.AccountMetaSlice.Get(5),
+										),
+									)
+									accountsBranch.Child(
+										format.Meta(
+											"            sysVarRent",
+											inst.AccountMetaSlice.Get(6),
+										),
+									)
+								},
+							)
+						},
+					)
+			},
+		)
 }
 
 func (inst Create) MarshalWithEncoder(encoder *bin.Encoder) error {

@@ -22,10 +22,10 @@ import (
 	"encoding/binary"
 	"fmt"
 
-	"github.com/gagliardetto/solana-go/text"
+	"github.com/Bestlend/solana-go/text"
 
+	"github.com/Bestlend/solana-go"
 	bin "github.com/gagliardetto/binary"
-	"github.com/gagliardetto/solana-go"
 )
 
 func init() {
@@ -56,7 +56,13 @@ func DecodeInstruction(accounts []*solana.AccountMeta, data []byte) (*Instructio
 	return &inst, nil
 }
 
-func NewRegisterTokenInstruction(logo Logo, name Name, symbol Symbol, website Website, tokenMetaKey, ownerKey, tokenKey solana.PublicKey) *Instruction {
+func NewRegisterTokenInstruction(
+	logo Logo,
+	name Name,
+	symbol Symbol,
+	website Website,
+	tokenMetaKey, ownerKey, tokenKey solana.PublicKey,
+) *Instruction {
 	return &Instruction{
 		BaseVariant: bin.BaseVariant{
 			TypeID: bin.TypeIDFromUint32(0, bin.LE),
@@ -102,9 +108,11 @@ func (i *Instruction) Data() ([]byte, error) {
 	return buf.Bytes(), nil
 }
 
-var InstructionDefVariant = bin.NewVariantDefinition(bin.Uint32TypeIDEncoding, []bin.VariantType{
-	{"register_token", (*RegisterToken)(nil)},
-})
+var InstructionDefVariant = bin.NewVariantDefinition(
+	bin.Uint32TypeIDEncoding, []bin.VariantType{
+		{"register_token", (*RegisterToken)(nil)},
+	},
+)
 
 func (i *Instruction) TextEncode(encoder *text.Encoder, option *text.Option) error {
 	return encoder.Encode(i.Impl, option)

@@ -4,9 +4,9 @@ import (
 	"bytes"
 	"testing"
 
+	"github.com/Bestlend/solana-go"
 	"github.com/davecgh/go-spew/spew"
 	bin "github.com/gagliardetto/binary"
-	"github.com/gagliardetto/solana-go"
 	"github.com/stretchr/testify/require"
 )
 
@@ -27,7 +27,8 @@ func TestMint(t *testing.T) {
 		err := dec.Decode(&mint)
 		require.NoError(t, err, spew.Sdump(mint))
 
-		require.Equal(t,
+		require.Equal(
+			t,
 			&Mint{
 				MintAuthority:   solana.MustPublicKeyFromBase58("Q6XprfkF8RQQKoQVG33xT88H7wi8Uk1B1CC7YAs69Gi").ToPointer(),
 				Supply:          1890000009537801,
@@ -72,7 +73,8 @@ func TestAccount(t *testing.T) {
 		require.NoError(t, err, spew.Sdump(account))
 
 		balance := uint64(2039280)
-		require.Equal(t,
+		require.Equal(
+			t,
 			&Account{
 				Mint:            solana.MustPublicKeyFromBase58("So11111111111111111111111111111111111111112"),
 				Owner:           solana.MustPublicKeyFromBase58("7HZaCWazgTuuFuajxaaxGYbGnyVKwxvsJKue1W4Nvyro"),
