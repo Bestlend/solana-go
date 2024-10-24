@@ -21,6 +21,7 @@ import (
 	"encoding/base64"
 	stdjson "encoding/json"
 	"fmt"
+	"github.com/shopspring/decimal"
 	"math/big"
 
 	bin "github.com/gagliardetto/binary"
@@ -236,60 +237,25 @@ type SimulatedInnerInstruction struct {
 }
 
 type NestedInnerInstruction struct {
-	Parsed      stdjson.RawMessage `json:"parsed,omitempty"`
-	Program     string             `json:"program"`
-	ProgramID   string             `json:"programId"`
-	Accounts    []string           `json:"accounts,omitempty"`
-	Data        string             `json:"data,omitempty"`
-	StackHeight int                `json:"stackHeight"`
+	Parsed      *InnerParsedInstruction `json:"parsed,omitempty"`
+	Program     string                  `json:"program"`
+	ProgramID   solana.PublicKey        `json:"programId"`
+	Accounts    []solana.PublicKey      `json:"accounts,omitempty"`
+	Data        *solana.Base58          `json:"data,omitempty"`
+	StackHeight int                     `json:"stackHeight"`
 }
 
-func (nii *NestedInnerInstruction) UnmarshalParsedInstruction() (InnerParsedInstruction, error) {
-	var parsedInstruction InnerParsedInstruction
-	err := json.Unmarshal(nii.Parsed, &parsedInstruction)
-	if err != nil {
-		return InnerParsedInstruction{}, err
-	}
-	return parsedInstruction, nil
-}
-
-// Struct to represent parsed transfer information
 type TransferInfo struct {
-	Amount      string         `json:"amount"`
-	Authority   string         `json:"authority"`
-	Destination string         `json:"destination"`
-	Source      string         `json:"source"`
-	Mint        string         `json:"mint"`
-	TokenAmount *UiTokenAmount `json:"tokenAmount"`
+	Amount      decimal.Decimal  `json:"amount"`
+	Authority   solana.PublicKey `json:"authority"`
+	Destination solana.PublicKey `json:"destination"`
+	Source      solana.PublicKey `json:"source"`
+	Mint        solana.PublicKey `json:"mint"`
 }
 
-// Struct to represent tokenAmount for transferChecked
-type TokenAmount struct {
-	Amount         string  `json:"amount"`
-	Decimals       int     `json:"decimals"`
-	UiAmount       float64 `json:"uiAmount"`
-	UiAmountString string  `json:"uiAmountString"`
-}
-
-// Struct for parsed transferChecked info
-type TransferCheckedInfo struct {
-	Authority   string      `json:"authority"`
-	Destination string      `json:"destination"`
-	Mint        string      `json:"mint"`
-	Source      string      `json:"source"`
-	TokenAmount TokenAmount `json:"tokenAmount"`
-}
-
-// Struct to represent parsed instruction
 type InnerParsedInstruction struct {
 	Info TransferInfo `json:"info"`
 	Type string       `json:"type"`
-}
-
-// Struct to represent parsed transferChecked instruction
-type ParsedTransferChecked struct {
-	Info TransferCheckedInfo `json:"info"`
-	Type string              `json:"type"`
 }
 
 type CompiledInnerInstruction struct {
