@@ -71,6 +71,9 @@ type SimulateTransactionOpts struct {
 	ReplaceRecentBlockhash bool
 
 	Accounts *SimulateTransactionAccountsOpts
+
+	// If true, the response will include the list of inner instructions.
+	InnerInstructions bool
 }
 
 type SimulateTransactionAccountsOpts struct {
@@ -123,6 +126,9 @@ func (cl *Client) SimulateRawTransactionWithOpts(
 				"encoding":  opts.Accounts.Encoding,
 				"addresses": opts.Accounts.Addresses,
 			}
+		}
+		if opts.InnerInstructions {
+			obj["innerInstructions"] = opts.InnerInstructions
 		}
 	}
 
